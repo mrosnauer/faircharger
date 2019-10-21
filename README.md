@@ -1,1 +1,2 @@
-# faircharger
+# Faircharger
+Faircharger ist ein Blockchain-Projekt.

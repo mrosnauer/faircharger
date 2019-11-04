@@ -1,0 +1,16 @@
+{
+  "name": "fair-charger-truffle",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "truffle": "^5.0.43"
+  }
+}

@@ -1,6 +1,6 @@
 pragma solidity ^0.5.8;
 
-contract DHBWCoin {
+contract FairCharger {
   mapping (address => uint256) private _balances;
   mapping (address => mapping (address => uint256)) private _allowances;
   uint256 private _totalSupply;
@@ -14,11 +14,11 @@ contract DHBWCoin {
   }
 
   function name() public pure returns (string memory) {
-    return "DHBWCoin";
+    return "FairCharger";
   }
 
   function symbol() public pure returns (string memory) {
-    return "DHBW";
+    return "Fair";
   }
 
   function decimals() public pure returns (uint8) {

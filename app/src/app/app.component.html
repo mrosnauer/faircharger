@@ -1,0 +1,23 @@
+<h1>FairCharger</h1>
+<div>
+    TODO: Metadata
+</div>
+
+<br>
+
+<input type="text"  #titleInput placeholder="Charger ID">
+<button type="submit" (click) = 'sendChargeRequest(titleInput.value)'>Send charge request</button>
+
+
+<br>
+
+<div *ngIf="infoAndPrice">
+    Price: 3
+    <button type="submit" (click) = 'sendChargeRequest(titleInput.value)'>Accept price</button>
+</div>
+
+<div *ngIf="charging">
+
+
+</div>
+  

@@ -10,6 +10,8 @@ tmp/
 app/**/*.js
 app/**/*.js.map
 
+truffle-config.js
+
 # dependencies
 node_modules/
 bower_components/

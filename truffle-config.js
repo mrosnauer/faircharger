@@ -45,7 +45,7 @@ module.exports = {
     // options below to some value.
     //
     develop: {
-     port: 8545,            // Standard Ethereum port (default: none)
+     port: 7545,            // Standard Ethereum port (default: none)
     },
 
     // Another network with more advanced options...

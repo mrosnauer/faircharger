@@ -11,6 +11,7 @@
 	// Uncomment the next line if you want to publish any ports.
 	"appPort": [
 		7545,
+		5777,
 		8080,
 		4200
 	],

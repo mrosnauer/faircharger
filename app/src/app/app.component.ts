@@ -82,7 +82,7 @@ export class AppComponent {
 
   sendChargeRequest(chargerID: string) {
     console.log(chargerID);
-
+    
     this.infoAndPrice = true;
   }
 

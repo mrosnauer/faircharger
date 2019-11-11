@@ -32,3 +32,20 @@ The chain contracts.
 
 ## Mappings
 account -> balance
+
+## Run project
+
+1. clone repo
+2. open in vs code
+3. enable Remote-Container extension
+4. start Docker
+5. reopen folder in container
+6. execute './run.sh' root level
+7. execure 'npm start' root level
+8. navigare into 'charger' and execure 'npm i', 'npm run build' and 'npm start'
+9. navigare into 'app' and execure 'npm i', 'npm run build' and 'npm start'
+
+The services are availiable at:
+- angular       localhost:4200
+- server        localhost:8080
+- block-chain   localhost:7545

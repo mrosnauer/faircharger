@@ -25,10 +25,12 @@ export class AppComponent {
   private fairChargerContract;
   private account;
 
-  public AppComponent() {
-    if (window.web3.currentProvider) {
+  
+  ngOnInit() {
+    console.log(window.ethereum);
+    if (window.ethereum) {
       // use MetaMask's provider
-      this.web3 = new Web3(window.web3.currentProvider);
+      this.web3 = new Web3(window.ethereum);
       window.ethereum.enable(); // get permission to access accounts
     } else {
       console.warn(
@@ -71,8 +73,8 @@ export class AppComponent {
   }
 
   public async sendCoin() {
-    const amount = parseInt(document.getElementById("amount").value);
-    const receiver = document.getElementById("receiver").value;
+    const amount = parseInt((<HTMLInputElement>document.getElementById("amount")).value);
+    const receiver = (<HTMLInputElement>document.getElementById("receiver")).value;
 
     this.setStatus("Initiating transaction... (please wait)");
 

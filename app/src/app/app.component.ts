@@ -1,15 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { FormControl } from "@angular/forms";
-
+import { WEB3 } from './share/web3';
 import Web3 from "web3";
 
 import * as dhbwCoinArtifact from '../../../build/contracts/FairCharger.json';
 
 declare global {
-  interface Window { web3: any; ethereum:any}
+  interface Window { web3: Web3; ethereum: any }
 }
 
-window.web3 = window.web3 || {};
+
+window.web3 = window.web3 || undefined;
 
 @Component({
   selector: 'app-root',
@@ -20,27 +21,14 @@ export class AppComponent {
   title = 'FairCharger';
   infoAndPrice = false;
   charging = false;
-  private firstName:FormControl;
-  private web3;
+  private firstName: FormControl;
   private fairChargerContract;
   private account;
 
-  
+  constructor(@Inject(WEB3) private web3: Web3) {
+  }
+
   ngOnInit() {
-    console.log(window.ethereum);
-    if (window.ethereum) {
-      // use MetaMask's provider
-      this.web3 = new Web3(window.ethereum);
-      window.ethereum.enable(); // get permission to access accounts
-    } else {
-      console.warn(
-        "No web3 detected. Falling back to http://127.0.0.1:8545. You should remove this fallback when you deploy live",
-      );
-      // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-      this.web3 = new Web3(
-        new Web3.providers.HttpProvider("http://127.0.0.1:8545"),
-      );
-    }
   }
 
   public async start() {
@@ -69,7 +57,7 @@ export class AppComponent {
     const decimal = await decimals().call();
 
     const balanceElement = document.getElementsByClassName("balance")[0];
-    balanceElement.innerHTML = `${balance/(Math.pow(10, decimal))}.${(balance % 100).toString().padStart(2, '0')}`;
+    balanceElement.innerHTML = `${balance / (Math.pow(10, decimal))}.${(balance % 100).toString().padStart(2, '0')}`;
   }
 
   public async sendCoin() {
@@ -79,21 +67,21 @@ export class AppComponent {
     this.setStatus("Initiating transaction... (please wait)");
 
     const { transfer } = this.fairChargerContract.methods;
-    await transfer(receiver, amount*100).send({ from: this.account });
+    await transfer(receiver, amount * 100).send({ from: this.account });
 
     this.setStatus("Transaction complete!");
     this.refreshBalance();
   }
 
-  public setStatus(message:any) {
+  public setStatus(message: any) {
     const status = document.getElementById("status");
     status.innerHTML = message;
   }
 
-  sendChargeRequest(title:string) {
+  sendChargeRequest(title: string) {
     console.log(title);
   }
 
-  
+
 
 }

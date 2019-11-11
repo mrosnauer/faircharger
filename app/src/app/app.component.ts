@@ -4,6 +4,7 @@ import { FormControl } from "@angular/forms";
 import Web3 from "web3";
 
 import * as dhbwCoinArtifact from '../../../build/contracts/FairCharger.json';
+import { ChargeStickService } from './charge-stick.service.js';
 
 declare global {
   interface Window { web3: any; ethereum:any}
@@ -26,7 +27,7 @@ export class AppComponent {
   private fairChargerContract;
   private account;
 
-
+  constructor(private service: ChargeStickService) {   }
   
   ngOnInit() {
     if (window.ethereum) {
@@ -91,10 +92,18 @@ export class AppComponent {
     status.innerHTML = message;
   }
 
-  sendChargeRequest(title:string) {
-    console.log(title);
+  sendChargeRequest(chargerID:string) {
+    console.log(chargerID);
+    
+    this.infoAndPrice = true;
   }
 
-  
+  startCharging() {
+
+  }
+
+  declinePrice() {
+    this.infoAndPrice = false;
+  }
 
 }

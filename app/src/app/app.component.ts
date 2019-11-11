@@ -20,14 +20,15 @@ export class AppComponent {
   title = 'FairCharger';
   infoAndPrice = false;
   charging = false;
+  currentBalance = "";
   private firstName:FormControl;
   private web3;
   private fairChargerContract;
   private account;
 
+
   
   ngOnInit() {
-    console.log(window.ethereum);
     if (window.ethereum) {
       // use MetaMask's provider
       this.web3 = new Web3(window.ethereum);
@@ -41,6 +42,7 @@ export class AppComponent {
         new Web3.providers.HttpProvider("http://127.0.0.1:8545"),
       );
     }
+    this.start();
   }
 
   public async start() {
@@ -68,8 +70,7 @@ export class AppComponent {
     const balance = await balanceOf(this.account).call();
     const decimal = await decimals().call();
 
-    const balanceElement = document.getElementsByClassName("balance")[0];
-    balanceElement.innerHTML = `${balance/(Math.pow(10, decimal))}.${(balance % 100).toString().padStart(2, '0')}`;
+    this.currentBalance = `${balance/(Math.pow(10, decimal))}.${(balance % 100).toString().padStart(2, '0')}`;
   }
 
   public async sendCoin() {

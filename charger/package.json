@@ -8,7 +8,8 @@
         "build": "npm run build-ts && npm run lint",
         "build-ts": "tsc",
         "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix",
-        "serve": "node dist/index.js"
+        "serve": "node dist/index.js",
+        "watch": "nodemon"
     },
     "author": "",
     "license": "ISC",
@@ -21,6 +22,7 @@
         "@typescript-eslint/eslint-plugin": "^2.6.0",
         "@typescript-eslint/parser": "^2.6.0",
         "eslint": "^6.6.0",
+        "nodemon": "^1.19.4",
         "typescript": "^3.6.4"
     }
 }

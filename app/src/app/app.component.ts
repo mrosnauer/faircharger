@@ -40,7 +40,7 @@ export class AppComponent {
       const networkId = await this.web3.eth.net.getId();
       const deployedNetwork = dhbwCoinArtifact.networks[networkId];
       this.fairChargerContract = new this.web3.eth.Contract(
-        dhbwCoinArtifact.abi,
+        dhbwCoinArtifact.abi as any,
         deployedNetwork.address,
       );
 

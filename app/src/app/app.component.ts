@@ -4,6 +4,7 @@ import { WEB3 } from './share/web3';
 import Web3 from "web3";
 
 import * as dhbwCoinArtifact from '../../../build/contracts/FairCharger.json';
+import { ChargeStickService } from './charge-stick.service.js';
 
 declare global {
   interface Window { web3: Web3; ethereum: any }
@@ -21,14 +22,16 @@ export class AppComponent {
   title = 'FairCharger';
   infoAndPrice = false;
   charging = false;
+  currentBalance = "";
   private firstName: FormControl;
   private fairChargerContract;
   private account;
 
-  constructor(@Inject(WEB3) private web3: Web3) {
+  constructor(@Inject(WEB3) private web3: Web3, private service: ChargeStickService) {
   }
 
   ngOnInit() {
+    this.start();
   }
 
   public async start() {
@@ -56,8 +59,7 @@ export class AppComponent {
     const balance = await balanceOf(this.account).call();
     const decimal = await decimals().call();
 
-    const balanceElement = document.getElementsByClassName("balance")[0];
-    balanceElement.innerHTML = `${balance / (Math.pow(10, decimal))}.${(balance % 100).toString().padStart(2, '0')}`;
+    this.currentBalance = `${balance / (Math.pow(10, decimal))}.${(balance % 100).toString().padStart(2, '0')}`;
   }
 
   public async sendCoin() {
@@ -78,10 +80,18 @@ export class AppComponent {
     status.innerHTML = message;
   }
 
-  sendChargeRequest(title: string) {
-    console.log(title);
+  sendChargeRequest(chargerID: string) {
+    console.log(chargerID);
+
+    this.infoAndPrice = true;
   }
 
+  startCharging() {
 
+  }
+
+  declinePrice() {
+    this.infoAndPrice = false;
+  }
 
 }

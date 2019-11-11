@@ -1,19 +1,21 @@
 <h1>FairCharger</h1>
 <div>
-    TODO: Metadata
+    <div>Aktueller Kontostand: {{currentBalance}} Ether</div>
 </div>
 
 <br>
 
-<input type="text"  #titleInput placeholder="Charger ID">
-<button type="submit" (click) = 'sendChargeRequest(titleInput.value)'>Send charge request</button>
+<input type="text"  #titleInput placeholder="Ladesäulen ID">
+<button type="submit" (click) = 'sendChargeRequest(titleInput.value)'>Preis abrufen</button>
 
 
+<br>
 <br>
 
 <div *ngIf="infoAndPrice">
     Price: 3
-    <button type="submit" (click) = 'sendChargeRequest(titleInput.value)'>Accept price</button>
+    <button type="submit" (click) = 'startCharging()'>Ladevorgang starten</button>
+    <button type="submit" (click) = 'declinePrice()'>Abbrechen</button>
 </div>
 
 <div *ngIf="charging">

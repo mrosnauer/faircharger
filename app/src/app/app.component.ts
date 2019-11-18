@@ -5,6 +5,7 @@ import Web3 from "web3";
 
 import * as dhbwCoinArtifact from '../../../build/contracts/FairCharger.json';
 import { ChargeStickService } from './charge-stick.service.js';
+import { Observable, interval } from 'rxjs';
 
 declare global {
   interface Window { web3: Web3; ethereum: any }
@@ -19,8 +20,24 @@ window.web3 = window.web3 || undefined;
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
+  /*
+  Injected
+  */
+  carSOCPercent = 0;
+  carSOCAbsolute = 0;
+  carBatteryCap = 10;
+  initialSOC = 0;
+  totalCost = 0;
+
+  private updateSOC() {
+    this.carSOCPercent = this.carSOCAbsolute / this.carBatteryCap * 100;
+  }
+
+  simulation;
+
+
   title = 'FairCharger';
-  infoAndPrice = false;
+  showPriceInfo = false;
   charging = false;
   currentBalance = "";
   errorMessage = "";
@@ -88,7 +105,7 @@ export class AppComponent {
     if (chargerID !== undefined && chargerID !== "") {
       this.service.sendGetRequest("/charger/" + chargerID).subscribe(
         (data: any) => {
-          this.infoAndPrice = true;
+          this.showPriceInfo = true;
           this.price = data.price;
           this.chargeAccount = data.accountID;
         },
@@ -103,12 +120,35 @@ export class AppComponent {
 
   }
 
-  startCharging() {
 
-  }
 
   declinePrice() {
-    this.infoAndPrice = false;
+    this.showPriceInfo = false;
+    this.chargeAccount = null;
+    this.price = null;
   }
 
+  startCharging() {
+    this.carSOCPercent = 0;
+    this.initialSOC = this.carSOCAbsolute;
+    this.totalCost = 0;
+    this.charging = true;
+    this.simulation = interval(100)
+      .subscribe((val) => {
+        if (this.carSOCAbsolute >= this.carBatteryCap) {
+          this.endCharging();
+        } else {
+          this.carSOCAbsolute += 0.1;
+          this.totalCost = (this.carSOCAbsolute - this.initialSOC) * this.price;
+          this.updateSOC();
+        }
+        //TODO: Pay
+      });
+
+  }
+
+
+  endCharging() {
+    this.simulation.unsubscribe();
+  }
 }

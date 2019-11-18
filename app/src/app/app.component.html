@@ -16,7 +16,7 @@
     {{errorMessage}}
 </div>
 
-<div *ngIf="infoAndPrice">
+<div *ngIf="showPriceInfo">
     <div style="color:red">Ladesäulen-ID: {{chargeAccount}}</div>
     <div style="color:red">Preis: {{price}} Ether pro kWh</div>
     <button type="submit" (click) = 'startCharging()'>Ladevorgang starten</button>
@@ -24,7 +24,10 @@
 </div>
 
 <div *ngIf="charging">
-
+    <div style="color:red">Ladezustand Auto {{carSOCPercent}} %</div>
+    <div style="color:red">Geladener Strom {{carSOCAbsolute-initialSOC}} kWh</div>
+    <div style="color:red">Kosten {{totalCost}} Ether</div>
+    <button type="submit" (click) = 'endCharging()'>Ladevorgang abbrechen...</button>
 
 </div>
   

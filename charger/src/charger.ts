@@ -1,9 +1,9 @@
 import { Express } from 'express';
-import Web3 from "web3";
+import Web3 from 'web3';
 
 interface ICharger {
-    id: Number,
-    account: Web3
+    id: number;
+    account: Web3;
 }
 
 class Changer {
@@ -15,6 +15,6 @@ class Changer {
      * registerRoutes
      */
     public registerRoutes() {
-        this.app.get('/charger')
+        this.app.get('/charger');
     }
 }

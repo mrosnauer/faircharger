@@ -23,6 +23,7 @@ export class AppComponent {
   infoAndPrice = false;
   charging = false;
   currentBalance = "";
+  errorMessage = "";
   private firstName: FormControl;
   private fairChargerContract;
   private account;
@@ -81,9 +82,21 @@ export class AppComponent {
   }
 
   sendChargeRequest(chargerID: string) {
-    console.log(chargerID);
-    
-    this.infoAndPrice = true;
+    if (chargerID !== undefined && chargerID !== "") {
+      this.service.sendGetRequest("/charger/" + chargerID).subscribe(
+        (data: any) => {
+          console.log(data);
+          this.infoAndPrice = true;
+        },
+        error => {
+          console.log('oops', error)
+          this.errorMessage = "Beim Laden ist ein Fehler aufgetreten";
+        }
+      );
+    } else {
+      alert("Bitte die Ladesäule angeben");
+    }
+
   }
 
   startCharging() {

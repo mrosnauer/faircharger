@@ -12,6 +12,10 @@
 <br>
 <br>
 
+<div *ngIf="errorMessage !=''" style="color:red">
+    {{errorMessage}}
+</div>
+
 <div *ngIf="infoAndPrice">
     Price: 3
     <button type="submit" (click) = 'startCharging()'>Ladevorgang starten</button>

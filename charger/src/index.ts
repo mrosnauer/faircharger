@@ -7,6 +7,10 @@ app.get('/', (req, res) => {
     res.send('Hello world!');
 });
 
+app.get('/charger/23', (req, res) => {
+    res.send('Hello world!');
+});
+
 // start the Express server
 app.listen(port, () => {
     console.log(`server started at http://localhost:${port}`);

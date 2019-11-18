@@ -28,6 +28,9 @@ export class AppComponent {
   private fairChargerContract;
   private account;
 
+  chargeAccount;
+  price = 0;
+
   constructor(@Inject(WEB3) private web3: Web3, private service: ChargeStickService) {
   }
 
@@ -85,10 +88,11 @@ export class AppComponent {
     if (chargerID !== undefined && chargerID !== "") {
       this.service.sendGetRequest("/charger/" + chargerID).subscribe(
         (data: any) => {
-          console.log(data);
           this.infoAndPrice = true;
+          this.price = data.price;
+          this.chargeAccount = data.accountID;
         },
-        error => {
+        (error) => {
           console.log('oops', error)
           this.errorMessage = "Beim Laden ist ein Fehler aufgetreten";
         }

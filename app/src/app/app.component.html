@@ -17,7 +17,8 @@
 </div>
 
 <div *ngIf="infoAndPrice">
-    Price: 3
+    <div style="color:red">Ladesäulen-ID: {{chargeAccount}}</div>
+    <div style="color:red">Preis: {{price}} Ether pro kWh</div>
     <button type="submit" (click) = 'startCharging()'>Ladevorgang starten</button>
     <button type="submit" (click) = 'declinePrice()'>Abbrechen</button>
 </div>

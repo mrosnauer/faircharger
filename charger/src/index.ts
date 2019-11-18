@@ -12,7 +12,11 @@ app.get('/', (req, res) => {
 });
 
 app.get('/charger/24', (req, res) => {
-    res.send('Hello world!');
+    const dummyData = {
+        accountID: '0x1827364',
+        price:23
+    };
+    res.send(dummyData);
 });
 
 // start the Express server

@@ -109,7 +109,7 @@ contract FairCharger {
         return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
     }
   /*
-    Payment Cahnnel end. 
+    Payment Channel end. 
   */
 
   function name() public pure returns (string memory) {

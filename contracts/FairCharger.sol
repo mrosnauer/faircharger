@@ -17,41 +17,73 @@ contract FairCharger {
     Payment Channels.
    */
    address owner = msg.sender;
+    address payable public sender;     // The account sending payments.
+    address payable public recipient;  // The account receiving the payments.
+    uint256 public expiration; // Timeout in case the recipient never closes.
 
-    mapping(uint256 => bool) usedNonces;
-
-    function claimPayment(uint256 amount, uint256 nonce, bytes memory signature) public {
-        require(!usedNonces[nonce]);
-        usedNonces[nonce] = true;
-
-        // this recreates the message that was signed on the client
-        bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, nonce, this)));
-
-        require(recoverSigner(message, signature) == owner);
-
-        msg.sender.transfer(amount);
+    function SimplePaymentChannel(address payable _recipient, uint256 duration)
+        public
+        payable
+    {
+        sender = msg.sender;
+        recipient = _recipient;
+        expiration = now + duration;
     }
 
-    /// destroy the contract and reclaim the leftover funds.
-    function kill() public {
-        require(msg.sender == owner);
-        selfdestruct(msg.sender);
+    function isValidSignature(uint256 amount, bytes memory signature)
+        internal
+        view
+        returns (bool)
+    {
+        bytes32 message = prefixed(keccak256(abi.encodePacked(this, amount)));
+
+        // Check that the signature is from the payment sender.
+        return recoverSigner(message, signature) == sender;
     }
 
-    /// signature methods.
+    // The recipient can close the channel at any time by presenting a signed
+    // amount from the sender. The recipient will be sent that amount, and the
+    // remainder will go back to the sender.
+    function close(uint256 amount, bytes memory signature) public {
+        require(msg.sender == recipient);
+        require(isValidSignature(amount, signature));
+
+        recipient.transfer(amount);
+        selfdestruct(sender);
+    }
+
+    // The sender can extend the expiration at any time.
+    function extend(uint256 newExpiration) public {
+        require(msg.sender == sender);
+        require(newExpiration > expiration);
+
+        expiration = newExpiration;
+    }
+
+    // If the timeout is reached without the recipient closing the channel, then
+    // the ether is released back to the sender.
+    function claimTimeout() public {
+        require(now >= expiration);
+        selfdestruct(sender);
+    }
+
     function splitSignature(bytes memory sig)
         internal
         pure
-        returns (uint8 v, bytes32 r, bytes32 s)
+        returns (uint8, bytes32, bytes32)
     {
         require(sig.length == 65);
 
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+
         assembly {
-            // first 32 bytes, after the length prefix.
+            // first 32 bytes, after the length prefix
             r := mload(add(sig, 32))
-            // second 32 bytes.
+            // second 32 bytes
             s := mload(add(sig, 64))
-            // final byte (first byte of the next 32 bytes).
+            // final byte (first byte of the next 32 bytes)
             v := byte(0, mload(add(sig, 96)))
         }
 
@@ -63,16 +95,19 @@ contract FairCharger {
         pure
         returns (address)
     {
-        (uint8 v, bytes32 r, bytes32 s) = splitSignature(sig);
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+
+        (v, r, s) = splitSignature(sig);
 
         return ecrecover(message, v, r, s);
     }
 
-    /// builds a prefixed hash to mimic the behavior of eth_sign.
+    // Builds a prefixed hash to mimic the behavior of eth_sign.
     function prefixed(bytes32 hash) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
     }
-
   /*
     Payment Cahnnel end. 
   */
@@ -97,7 +132,7 @@ contract FairCharger {
     return _balances[account];
   }
 
-  function transfer(address recipient, uint256 amount) public returns (bool) {
+  function transfer(uint256 amount) public returns (bool) {
     require(_balances[msg.sender] - amount >= 0, "Sender does not have enough coins");
     _balances[msg.sender] -= amount;
     _balances[recipient] += amount;
@@ -115,7 +150,7 @@ contract FairCharger {
     return _allowances[owner][spender];
   }
 
-  function transferFrom(address from, address recipient, uint256 amount) public returns (bool) {
+  function transferFrom(address from, uint256 amount) public returns (bool) {
     require(_allowances[from][msg.sender] >= amount, "Allowance does not suffice");
     require(_balances[from] - amount >= 0, "Sender does not have enough coins");
     _balances[from] -= amount;

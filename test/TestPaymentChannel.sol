@@ -21,11 +21,14 @@ contract TestPaymentChannel {
     Assert.equal(charger.balanceOf(tx.origin), expected, "Owner should have 10000 MetaCoin initially");
   }
 
-  function testTransferFrom() public {
-    /*FairCharger meta = FairCharger(DeployedAddresses.FairCharger());
-    
-    uint transferAmount = 1000;*/
+  function testReturnName() public {
+    FairCharger charger = FairCharger(DeployedAddresses.FairCharger());
+    Assert.equal(charger.name(), "FairCharger", "Name of Application is FairCharger");
+  }
 
-
+  function testDecimals() public {
+    FairCharger charger = FairCharger(DeployedAddresses.FairCharger());
+    uint expected = 2;
+    Assert.equal(charger.decimals(), expected, "Cut 2 decimals");
   }
 }

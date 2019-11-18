@@ -6,19 +6,19 @@ import "../contracts/FairCharger.sol";
 
 contract TestPaymentChannel {
   function testInitialBalanceUsingDeployedContract() public{
-    FairCharger meta = FairCharger(DeployedAddresses.FairCharger());
+    FairCharger charger = FairCharger(DeployedAddresses.FairCharger());
 
     uint expected = 10000;
 
-    Assert.equal(meta.balanceOf(msg.sender), expected, "Owner should have 10000 MetaCoin initially");
+    Assert.equal(charger.balanceOf(msg.sender), expected, "Owner should have 10000 MetaCoin initially");
   }
 
-  function testInitialBalanceWithNewMetaCoin() public{
-    FairCharger meta = new FairCharger();
+  function testInitialBalanceWithNewContract() public{
+    FairCharger charger = new FairCharger();
 
     uint expected = 10000;
 
-    Assert.equal(meta.balanceOf(tx.origin), expected, "Owner should have 10000 MetaCoin initially");
+    Assert.equal(charger.balanceOf(tx.origin), expected, "Owner should have 10000 MetaCoin initially");
   }
 
   function testTransferFrom() public {

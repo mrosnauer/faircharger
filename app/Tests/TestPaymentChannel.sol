@@ -4,9 +4,9 @@ import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
 import "../contracts/FairCharger.sol";
 
-contract PaymentChannelTest {
+contract TestPaymentChannel {
   function testInitialBalanceUsingDeployedContract() {
-    MetaCoin meta = Faircharger(DeployedAddresses.FairCharger());
+    FairCharger meta = FairCharger(DeployedAddresses.FairCharger());
 
     uint expected = 10000;
 
@@ -14,7 +14,7 @@ contract PaymentChannelTest {
   }
 
   function testInitialBalanceWithNewMetaCoin() {
-    MetaCoin meta = new Faircharger();
+    FairCharger meta = new FairCharger();
 
     uint expected = 10000;
 

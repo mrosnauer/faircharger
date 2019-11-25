@@ -43,8 +43,13 @@ contract TestPaymentChannel {
   function testTransferSender() public {
     FairCharger charger = FairCharger(DeployedAddresses.FairCharger());
     uint256 amount = 1000;
-    charger.transfer(amount);
-    Assert.equal(charger.balanceOf(msg.sender), expected, "Sender didnt received the Payment of 10.");
+
+    address receiver = 0x820Fc7728d51992421E096317849C4d9b143ae8B;
+    uint256 receiverBalance = charger.balanceOf(receiver);
+    uint256 expected = receiverBalance + amount;
+
+    charger.transfer(receiver, amount);
+    Assert.equal(charger.balanceOf(receiver), expected, "Sender didnt received the Payment of 10.");
   }
 
 }

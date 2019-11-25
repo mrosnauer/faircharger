@@ -33,7 +33,7 @@ contract FairCharger {
     return _balances[account];
   }
 
-  function transfer(uint256 amount) public returns (bool) {
+ function transfer(address recipient, uint256 amount) public returns (bool) {
     require(_balances[msg.sender] - amount >= 0, "Sender does not have enough coins");
     _balances[msg.sender] -= amount;
     _balances[recipient] += amount;
@@ -47,11 +47,10 @@ contract FairCharger {
     return true;
   }
 
-  function allowance(address spender) public view returns (uint256) {
+  function allowance(address owner, address spender) public view returns (uint256) {
     return _allowances[owner][spender];
   }
-
-  function transferFrom(address from, uint256 amount) public returns (bool) {
+   function transferFrom(address from, address recipient, uint256 amount) public returns (bool) {
     require(_allowances[from][msg.sender] >= amount, "Allowance does not suffice");
     require(_balances[from] - amount >= 0, "Sender does not have enough coins");
     _balances[from] -= amount;

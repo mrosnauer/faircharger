@@ -1,10 +1,10 @@
 import express from 'express';
-import { ChargerManager } from './charger'
+import cors from 'cors';
+import { ChargerManager } from './charger';
 
 const app = express();
 const port = 8080; // default port to listen
 
-const cors = require('cors');
 
 // Use this after the variable declaration
 app.use(cors());

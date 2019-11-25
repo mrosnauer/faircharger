@@ -44,7 +44,7 @@ export class AppComponent {
   private carSOCAbsolute = 0;
   carSOCAbsoluteOut = "";
 
-  
+
 
   private initialSOC = 0;
 
@@ -57,8 +57,12 @@ export class AppComponent {
   /**
    * Account Information
    */
-  currentBalance = "";
-  remainingBalance = "";
+
+  private currentBalance = 0;
+  currentBalanceOut = "";
+  private remainingBalance = 0;
+  remainingBalanceOut = "";
+
   private fairChargerContract;
   private account;
 
@@ -68,17 +72,19 @@ export class AppComponent {
   /**
    * Update the Out-Values
    */
-  private updateSOC() {
+  private updateUI() {
     this.carSOCPercent = this.carSOCAbsolute / this.carBatteryCap * 100;
     this.carSOCPercentOut = this.carSOCPercent.toFixed(2);
     this.totalCostOut = this.totalCost.toFixed(2);
     this.carSOCAbsoluteOut = this.carSOCAbsolute.toFixed(2);
     this.totalChargeOut = this.totalCharge.toFixed(2);
-    
+
+    this.remainingBalanceOut = this.remainingBalance.toFixed(2);
+
   }
 
-  
-  
+
+
   constructor(@Inject(WEB3) private web3: Web3, private service: ChargeStickService) {
   }
 
@@ -104,15 +110,17 @@ export class AppComponent {
     } catch (error) {
       console.error("Could not connect to contract or chain.");
     }
-    this.updateSOC();
+    this.updateUI();
   }
 
   public async refreshBalance() {
     const { balanceOf, decimals } = this.fairChargerContract.methods;
     const balance = await balanceOf(this.account).call();
     const decimal = await decimals().call();
+    const balanceF = parseFloat(balance) / Math.pow(10, decimal);
 
-    this.currentBalance = `${balance / (Math.pow(10, decimal))}.${(balance % 100).toString().padStart(2, '0')}`;
+    this.currentBalanceOut = balanceF.toFixed(decimal);
+    this.currentBalance = decimal;
   }
 
   public async send(amount: any) {
@@ -120,9 +128,6 @@ export class AppComponent {
 
     const { transfer } = this.fairChargerContract.methods;
     await transfer(this.chargerAccount, amount * 100).send({ from: this.account });
-
-    this.statusText = "Transaction complete!";
-    this.refreshBalance();
   }
 
   public setStatus(message: any) {
@@ -159,7 +164,7 @@ export class AppComponent {
     this.carSOCPercent = 0;
     this.initialSOC = 0;
     this.totalCost = 0;
-    this.updateSOC();
+    this.updateUI();
     this.endCharging();
     this.showChargingInfo = false;
     this.statusText = "Bereit";
@@ -171,7 +176,7 @@ export class AppComponent {
     this.initialSOC = this.carSOCAbsolute;
     this.totalCost = 0;
     this.showChargingInfo = true;
-    this.updateSOC();
+    this.updateUI();
     this.charging = true;
     this.statusText = "Lade...";
     this.statusColor = "green";
@@ -183,7 +188,8 @@ export class AppComponent {
           this.carSOCAbsolute += 0.001;
           this.totalCharge = this.carSOCAbsolute - this.initialSOC;
           this.totalCost = (this.carSOCAbsolute - this.initialSOC) * this.price;
-          this.updateSOC();
+          this.remainingBalance = this.currentBalance - this.totalCost;
+          this.updateUI();
         }
         //TODO: Pay
       });
@@ -196,13 +202,21 @@ export class AppComponent {
       this.statusText = "Ladevorgang abgeschlossen! Vervollständige Zahlung";
       this.statusColor = "black";
       this.simulation.unsubscribe();
-      this.send()
-      //TODO: PAY
-      this.statusText = "Zahlung erfolgreich";
-      this.statusColor = "black";
-      this.charging = false;
+      this.totalCost = Math.round(this.totalCost * 100) / 100;
+      this.send(this.totalCost.toFixed(2)).then(() => {
+        this.statusText = "Zahlung erfolgreich";
+        this.statusColor = "black";
+      }).catch(() => {
+        this.statusText = "Zahlung fehlerhaft";
+        this.statusColor = "red";
+      }).finally(() => {
+        this.charging = false;
+        this.showChargingInfo = false;
+        this.refreshBalance();
+      }); 
+
     }
-    
+
 
   }
 }

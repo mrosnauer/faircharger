@@ -14,14 +14,6 @@ contract TestPaymentChannel {
     Assert.equal(charger.balanceOf(msg.sender), expected, "Owner should have 10000 MetaCoin initially");
   }
 
-  function testInitialBalanceWithNewContract() public{
-    FairCharger charger = new FairCharger();
-
-    uint expected = 10000;
-
-    Assert.equal(charger.balanceOf(tx.origin), expected, "Owner should have 10000 MetaCoin initially");
-  }
-
   function testReturnName() public {
     FairCharger charger = FairCharger(DeployedAddresses.FairCharger());
     string memory expected = "FairCharger";

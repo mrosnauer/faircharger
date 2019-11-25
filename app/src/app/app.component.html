@@ -26,6 +26,7 @@
 <div *ngIf="showChargingInfo">
     <div style="color:green">Geladener Strom {{totalChargeOut}} kWh</div>
     <div style="color:red">Kosten {{totalCostOut}} Ether</div>
+    <div>Übriger Kontostand {{totalCostOut}} Ether</div>
     <button *ngIf="charging" type="submit" (click)='endCharging()'>Abschließen und bezahlen...</button>
 </div>
 <br>

@@ -58,10 +58,11 @@ export class AppComponent {
    * Account Information
    */
   currentBalance = "";
+  remainingBalance = "";
   private fairChargerContract;
   private account;
 
-  chargeAccount;
+  chargerAccount;
   price = 0;
 
   /**
@@ -114,16 +115,13 @@ export class AppComponent {
     this.currentBalance = `${balance / (Math.pow(10, decimal))}.${(balance % 100).toString().padStart(2, '0')}`;
   }
 
-  public async sendCoin() {
-    const amount = parseInt((<HTMLInputElement>document.getElementById("amount")).value);
-    const receiver = (<HTMLInputElement>document.getElementById("receiver")).value;
-
-    this.setStatus("Initiating transaction... (please wait)");
+  public async send(amount: any) {
+    this.statusText = "Initiating transaction... (please wait)";
 
     const { transfer } = this.fairChargerContract.methods;
-    await transfer(receiver, amount * 100).send({ from: this.account });
+    await transfer(this.chargerAccount, amount * 100).send({ from: this.account });
 
-    this.setStatus("Transaction complete!");
+    this.statusText = "Transaction complete!";
     this.refreshBalance();
   }
 
@@ -138,7 +136,7 @@ export class AppComponent {
         (data: any) => {
           this.showPriceInfo = true;
           this.price = data.price;
-          this.chargeAccount = data.accountID;
+          this.chargerAccount = data.accountID;
           this.statusText = "Bereit";
           this.statusColor = "green";
         },
@@ -156,7 +154,7 @@ export class AppComponent {
 
   declinePrice() {
     this.showPriceInfo = false;
-    this.chargeAccount = null;
+    this.chargerAccount = null;
     this.price = null;
     this.carSOCPercent = 0;
     this.initialSOC = 0;
@@ -198,6 +196,7 @@ export class AppComponent {
       this.statusText = "Ladevorgang abgeschlossen! Vervollständige Zahlung";
       this.statusColor = "black";
       this.simulation.unsubscribe();
+      this.send()
       //TODO: PAY
       this.statusText = "Zahlung erfolgreich";
       this.statusColor = "black";

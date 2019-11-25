@@ -20,34 +20,62 @@ window.web3 = window.web3 || undefined;
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  /*
-  Injected
-  */
-  carSOCPercent = 0;
-  carSOCAbsolute = 0;
-  carBatteryCap = 10;
-  initialSOC = 0;
-  totalCost = 0;
-
-  private updateSOC() {
-    this.carSOCPercent = this.carSOCAbsolute / this.carBatteryCap * 100;
-  }
-
-  simulation;
-
-
+  /**
+   * UI Variables
+   */
   title = 'FairCharger';
   showPriceInfo = false;
-  charging = false;
-  currentBalance = "";
+  showChargingInfo = false;
   errorMessage = "";
-  private firstName: FormControl;
+
+
+  /*
+  Car Information: Injected
+  */
+  simulation;
+  charging = false;
+  private carBatteryCap = 123;
+
+  private carSOCPercent = 0;
+  carSOCPercentOut = "";
+
+  private carSOCAbsolute = 0;
+  carSOCAbsoluteOut = "";
+
+  
+
+  private initialSOC = 0;
+
+  private totalCharge = 0;
+  totalChargeOut = "";
+
+  private totalCost = 0;
+  totalCostOut = "";
+
+  /**
+   * Account Information
+   */
+  currentBalance = "";
   private fairChargerContract;
   private account;
 
   chargeAccount;
   price = 0;
 
+  /**
+   * Update the Out-Values
+   */
+  private updateSOC() {
+    this.carSOCPercent = this.carSOCAbsolute / this.carBatteryCap * 100;
+    this.carSOCPercentOut = this.carSOCPercent.toFixed(2);
+    this.totalCostOut = this.totalCost.toFixed(2);
+    this.carSOCAbsoluteOut = this.carSOCAbsolute.toFixed(2);
+    this.totalChargeOut = this.totalCharge.toFixed(2);
+    
+  }
+
+  
+  
   constructor(@Inject(WEB3) private web3: Web3, private service: ChargeStickService) {
   }
 
@@ -73,6 +101,7 @@ export class AppComponent {
     } catch (error) {
       console.error("Could not connect to contract or chain.");
     }
+    this.updateSOC();
   }
 
   public async refreshBalance() {
@@ -120,25 +149,33 @@ export class AppComponent {
 
   }
 
-
-
   declinePrice() {
     this.showPriceInfo = false;
     this.chargeAccount = null;
     this.price = null;
+    this.carSOCPercent = 0;
+    this.initialSOC = 0;
+    this.totalCost = 0;
+    this.updateSOC();
+    this.endCharging();
+    this.showChargingInfo = false;
   }
 
   startCharging() {
     this.carSOCPercent = 0;
     this.initialSOC = this.carSOCAbsolute;
     this.totalCost = 0;
+    this.showChargingInfo = true;
+    this.updateSOC();
     this.charging = true;
-    this.simulation = interval(100)
+    this.simulation = interval(50)
       .subscribe((val) => {
         if (this.carSOCAbsolute >= this.carBatteryCap) {
+          
           this.endCharging();
         } else {
-          this.carSOCAbsolute += 0.1;
+          this.carSOCAbsolute += 0.001;
+          this.totalCharge = this.carSOCAbsolute - this.initialSOC;
           this.totalCost = (this.carSOCAbsolute - this.initialSOC) * this.price;
           this.updateSOC();
         }
@@ -149,6 +186,11 @@ export class AppComponent {
 
 
   endCharging() {
-    this.simulation.unsubscribe();
+    if (this.simulation) {
+      this.simulation.unsubscribe();
+      this.charging = false;
+    }
+    
+
   }
 }

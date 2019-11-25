@@ -1,33 +1,35 @@
 <h1>FairCharger</h1>
+<!--Infos zum Account und Auto-->
 <div>
     <div>Aktueller Kontostand: {{currentBalance}} Ether</div>
+    <div>Aktueller Ladezustand: {{carSOCPercentOut}} % / {{carSOCAbsoluteOut}} kWh</div>
 </div>
-
 <br>
 
-<input type="text"  #titleInput placeholder="Ladesäulen ID">
-<button type="submit" (click) = 'sendChargeRequest(titleInput.value)'>Preis abrufen</button>
-
-
-<br>
-<br>
-
-<div *ngIf="errorMessage !=''" style="color:red">
-    {{errorMessage}}
+<!--Verbinden zu einer Ladesäule-->
+<div>
+    <input type="text" #titleInput placeholder="Ladesäulen ID">
+    <button [disabled]="charging || showPriceInfo" type="submit" (click)='sendChargeRequest(titleInput.value)'>Preis
+        abrufen</button>
 </div>
+<br>
 
+<!--Ladesäulen-Info: ID und Preis-->
 <div *ngIf="showPriceInfo">
     <div style="color:red">Ladesäulen-ID: {{chargeAccount}}</div>
     <div style="color:red">Preis: {{price}} Ether pro kWh</div>
-    <button type="submit" (click) = 'startCharging()'>Ladevorgang starten</button>
-    <button type="submit" (click) = 'declinePrice()'>Abbrechen</button>
+    <button [disabled]="charging" type="submit" (click)='startCharging()'>Ladevorgang starten</button>
+    <button [disabled]="charging" type="submit" (click)='declinePrice()'>Ladesäule trennen</button>
+</div>
+<br>
+<!--Ladeinfo: Geladener Strom und Preis-->
+<div *ngIf="showChargingInfo">
+    <div style="color:green">Geladener Strom {{totalChargeOut}} kWh</div>
+    <div style="color:red">Kosten {{totalCostOut}} Ether</div>
+    <button *ngIf="charging" type="submit" (click)='endCharging()'>Abschließen und bezahlen...</button>
 </div>
 
-<div *ngIf="charging">
-    <div style="color:red">Ladezustand Auto {{carSOCPercent}} %</div>
-    <div style="color:red">Geladener Strom {{carSOCAbsolute-initialSOC}} kWh</div>
-    <div style="color:red">Kosten {{totalCost}} Ether</div>
-    <button type="submit" (click) = 'endCharging()'>Ladevorgang abbrechen...</button>
-
+<!--Fehlermeldung: Immer ganz unten-->
+<div *ngIf="errorMessage !=''" style="color:red">
+    {{errorMessage}}
 </div>
-  

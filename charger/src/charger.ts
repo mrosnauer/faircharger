@@ -23,8 +23,9 @@ export class ChargerManager {
      */
     public registerRoutes() {
         this.app.get('/charger', this.routGetAllCharger);
-        this.app.get('/charger/:id', this.reoutGetCharger);
         this.app.post('/charger', this.routCreateCharger);
+        this.app.get('/charger/:id', this.routGetCharger);
+        this.app.put('/charger/:id', this.routUpdateCharger);
         this.app.delete('/charger/:id', this.routDeleteCharger);
     }
 
@@ -42,6 +43,16 @@ export class ChargerManager {
         return charger;
     }
 
+    public updateCharger(newChargerData: Charger, id: number) {
+        const charger = this.chargers.find(x => x.id === id);
+        if (charger === undefined) {
+            return false;
+        }
+        charger.accountID = newChargerData.accountID;
+        charger.price = newChargerData.price;
+        return true;
+    }
+
     public deleteCharger(id: number) {
         const count = this.chargers.length;
         this.chargers = this.chargers.filter(x => x.id !== id);
@@ -53,7 +64,7 @@ export class ChargerManager {
         res.send(this.getAllCharger());
     }
 
-    private reoutGetCharger = (req: Request, res: Response) => {
+    private routGetCharger = (req: Request, res: Response) => {
         const id = this.validateChargerId(req, res);
         if (id === 0) { return; }
         const charger = this.getCharger(id);
@@ -62,6 +73,18 @@ export class ChargerManager {
             return;
         }
         res.send(charger);
+    }
+
+    private routUpdateCharger = (req: Request, res: Response) => {
+        const id = this.validateChargerId(req, res);
+        if (id === 0) { return; }
+
+        const newChargerData = req.body;
+        if (this.updateCharger(newChargerData, id) === false) {
+            res.status(404).send(`No charger found with id ${id}`);
+            return;
+        }
+        res.send();
     }
 
     private routCreateCharger = (req: Request, res: Response) => {

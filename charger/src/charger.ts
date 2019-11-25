@@ -70,11 +70,11 @@ export class ChargerManager {
 
     private validateChargerId = (req: Request, res: Response) => {
         const idParam = req.params.id;
-        try {
-            return Number(idParam);
-        } catch (error) {
+        const id = Number(idParam);
+        if (isNaN(id)) {
             res.status(400).send(`The ID after /charger/ was not a number! value: ${idParam}`);
             return 0;
         }
+        return id;
     }
 }

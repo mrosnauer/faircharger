@@ -16,8 +16,8 @@
 
 <!--Ladesäulen-Info: ID und Preis-->
 <div *ngIf="showPriceInfo">
-    <div style="color:red">Ladesäulen-ID: {{chargeAccount}}</div>
-    <div style="color:red">Preis: {{price}} Ether pro kWh</div>
+    <div>Ladesäulen-ID: {{chargeAccount}}</div>
+    <div>Preis: {{price}} Ether pro kWh</div>
     <button [disabled]="charging" type="submit" (click)='startCharging()'>Ladevorgang starten</button>
     <button [disabled]="charging" type="submit" (click)='declinePrice()'>Ladesäule trennen</button>
 </div>
@@ -28,8 +28,8 @@
     <div style="color:red">Kosten {{totalCostOut}} Ether</div>
     <button *ngIf="charging" type="submit" (click)='endCharging()'>Abschließen und bezahlen...</button>
 </div>
+<br>
 
-<!--Fehlermeldung: Immer ganz unten-->
-<div *ngIf="errorMessage !=''" style="color:red">
-    {{errorMessage}}
-</div>
+<!--Ladevorgang abschließen-->
+<div [ngStyle]="{'color': statusColor}">{{statusText}}</div>
+<br>

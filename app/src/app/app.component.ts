@@ -26,7 +26,9 @@ export class AppComponent {
   title = 'FairCharger';
   showPriceInfo = false;
   showChargingInfo = false;
-  errorMessage = "";
+  showChargingSummary = false;
+  statusText = "Bereit!";
+  statusColor = "green";
 
 
   /*
@@ -137,10 +139,13 @@ export class AppComponent {
           this.showPriceInfo = true;
           this.price = data.price;
           this.chargeAccount = data.accountID;
+          this.statusText = "Bereit";
+          this.statusColor = "green";
         },
         (error) => {
           console.log('oops', error)
-          this.errorMessage = "Beim Laden ist ein Fehler aufgetreten";
+          this.statusText = "Bei der Verbindung zur Ladesäule ist ein Fehler aufgetreten";
+          this.statusColor = "red";
         }
       );
     } else {
@@ -159,6 +164,8 @@ export class AppComponent {
     this.updateSOC();
     this.endCharging();
     this.showChargingInfo = false;
+    this.statusText = "Bereit";
+    this.statusColor = "green";
   }
 
   startCharging() {
@@ -168,10 +175,11 @@ export class AppComponent {
     this.showChargingInfo = true;
     this.updateSOC();
     this.charging = true;
+    this.statusText = "Lade...";
+    this.statusColor = "green";
     this.simulation = interval(50)
       .subscribe((val) => {
         if (this.carSOCAbsolute >= this.carBatteryCap) {
-          
           this.endCharging();
         } else {
           this.carSOCAbsolute += 0.001;
@@ -187,7 +195,12 @@ export class AppComponent {
 
   endCharging() {
     if (this.simulation) {
+      this.statusText = "Ladevorgang abgeschlossen! Vervollständige Zahlung";
+      this.statusColor = "black";
       this.simulation.unsubscribe();
+      //TODO: PAY
+      this.statusText = "Zahlung erfolgreich";
+      this.statusColor = "black";
       this.charging = false;
     }
     

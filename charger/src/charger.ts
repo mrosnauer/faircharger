@@ -6,7 +6,7 @@ interface ICharger {
     account: Web3;
 }
 
-class Changer {
+export class ChargerManager {
     private chargers: ICharger[] = [];
     private idCounter = 1;
     constructor(private app: Express) {

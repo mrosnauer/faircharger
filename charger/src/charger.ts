@@ -24,11 +24,11 @@ export class ChargerManager {
         this.app.delete('/charger/:id', this.deleteCharger);
     }
 
-    private getAllCharger = (req: Request, res: Response) => {
+    public getAllCharger = (req: Request, res: Response) => {
         res.send(this.chargers);
     }
 
-    private getCharger = (req: Request, res: Response) => {
+    public getCharger = (req: Request, res: Response) => {
         const id = this.validateChargerId(req, res);
         if (id === 0) { return; }
         const charger = this.chargers.find(x => x.id === id);
@@ -39,7 +39,7 @@ export class ChargerManager {
         res.send(charger);
     }
 
-    private createCharger = (req: Request, res: Response) => {
+    public createCharger = (req: Request, res: Response) => {
         const accountParam = req.body.account;
         if (Web3.utils.isAddress(accountParam) === false) {
             res.status(400).send(`The give account is not valid! account value: ${accountParam}`);
@@ -53,7 +53,7 @@ export class ChargerManager {
         res.send(charger);
     }
 
-    private deleteCharger = (req: Request, res: Response) => {
+    public deleteCharger = (req: Request, res: Response) => {
         const id = this.validateChargerId(req, res);
         if (id === 0) { return; }
 

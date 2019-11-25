@@ -1,13 +1,17 @@
 import { Request, Response, Express } from 'express';
 import Web3 from 'web3';
 
-interface Charger {
-    id: number;
-    account: Web3;
+export interface Charger {
+    price: number;
+    accountID: String;
+}
+
+interface InternalCharger extends Charger {
+    id: number
 }
 
 export class ChargerManager {
-    private chargers: Charger[];
+    private chargers: InternalCharger[];
     private idCounter: number;
     constructor(private app: Express) {
         this.chargers = [];
@@ -18,20 +22,41 @@ export class ChargerManager {
      * registerRoutes
      */
     public registerRoutes() {
-        this.app.get('/charger', this.getAllCharger);
-        this.app.get('/charger/:id', this.getCharger);
-        this.app.post('/charger', this.createCharger);
-        this.app.delete('/charger/:id', this.deleteCharger);
+        this.app.get('/charger', this.routGetAllCharger);
+        this.app.get('/charger/:id', this.reoutGetCharger);
+        this.app.post('/charger', this.routCreateCharger);
+        this.app.delete('/charger/:id', this.routDeleteCharger);
     }
 
-    public getAllCharger = (req: Request, res: Response) => {
-        res.send(this.chargers);
+    public getAllCharger() {
+        return this.chargers;
     }
 
-    public getCharger = (req: Request, res: Response) => {
+    public getCharger(id: number) {
+        return this.chargers.find(x => x.id === id);
+    }
+
+    public createCharger(chargerData: Charger) {
+        const charger: InternalCharger = Object.assign({ id: this.idCounter++ }, chargerData);
+        this.chargers.push(charger);
+        return charger;
+    }
+
+    public deleteCharger(id: number) {
+        const count = this.chargers.length;
+        this.chargers = this.chargers.filter(x => x.id !== id);
+        return count === this.chargers.length
+    }
+
+
+    private routGetAllCharger = (req: Request, res: Response) => {
+        res.send(this.getAllCharger());
+    }
+
+    private reoutGetCharger = (req: Request, res: Response) => {
         const id = this.validateChargerId(req, res);
         if (id === 0) { return; }
-        const charger = this.chargers.find(x => x.id === id);
+        const charger = this.getCharger(id);
         if (charger === undefined) {
             res.status(404).send(`No charger found with id ${id}`);
             return;
@@ -39,33 +64,37 @@ export class ChargerManager {
         res.send(charger);
     }
 
-    public createCharger = (req: Request, res: Response) => {
-        const accountParam = req.body.account;
-        if (Web3.utils.isAddress(accountParam) === false) {
-            res.status(400).send(`The give account is not valid! account value: ${accountParam}`);
+    private routCreateCharger = (req: Request, res: Response) => {
+        const priceParam = req.body.price
+        const price = Number(priceParam);
+        if (isNaN(price)) {
+            res.status(400).send(`The given price is not a number! price value: ${priceParam}`);
             return;
         }
-        const charger = {
-            id: this.idCounter++,
-            account: accountParam
+
+        const charger: Charger = {
+            accountID: req.body.account,
+            price
         };
-        this.chargers.push(charger);
-        res.send(charger);
+
+        const result = this.createCharger(charger);
+        if (typeof (result) === 'string') {
+            res.status(400).send(result);
+        } else {
+            res.send(charger);
+        }
     }
 
-    public deleteCharger = (req: Request, res: Response) => {
+    private routDeleteCharger = (req: Request, res: Response) => {
         const id = this.validateChargerId(req, res);
         if (id === 0) { return; }
 
-        const count = this.chargers.length;
-        this.chargers = this.chargers.filter(x => x.id !== id);
-
         // used guide: https://restfulapi.net/http-methods/#delete
-        if (count === this.chargers.length) {
+        if (this.deleteCharger(id)) {
             res.status(404).send(`No charger found with id ${id}`);
-            return;
+        } else {
+            res.status(204).send();
         }
-        res.status(204).send();
     }
 
     private validateChargerId = (req: Request, res: Response) => {

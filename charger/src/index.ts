@@ -1,23 +1,24 @@
 import express from 'express';
+import { ChargerManager } from './charger'
+
 const app = express();
 const port = 8080; // default port to listen
 
 const cors = require('cors');
 
-app.use(cors()); // Use this after the variable declaration
+// Use this after the variable declaration
+app.use(cors());
+
+// middleware which parses a json body to an object if the header contains 'Content-Type: application/json'
+app.use(express.json());
 
 // define a route handler for the default home page
 app.get('/', (req, res) => {
     res.send('Hello world!');
 });
 
-app.get('/charger/24', (req, res) => {
-    const dummyData = {
-        accountID: '0x1827364',
-        price:23
-    };
-    res.send(dummyData);
-});
+new ChargerManager(app).registerRoutes();
+
 
 // start the Express server
 app.listen(port, () => {

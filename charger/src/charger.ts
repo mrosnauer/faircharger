@@ -3,11 +3,11 @@ import Web3 from 'web3';
 
 export interface Charger {
     price: number;
-    accountID: String;
+    accountID: string;
 }
 
 interface InternalCharger extends Charger {
-    id: number
+    id: number;
 }
 
 export class ChargerManager {
@@ -45,7 +45,7 @@ export class ChargerManager {
     public deleteCharger(id: number) {
         const count = this.chargers.length;
         this.chargers = this.chargers.filter(x => x.id !== id);
-        return count === this.chargers.length
+        return count === this.chargers.length;
     }
 
 
@@ -65,7 +65,7 @@ export class ChargerManager {
     }
 
     private routCreateCharger = (req: Request, res: Response) => {
-        const priceParam = req.body.price
+        const priceParam = req.body.price;
         const price = Number(priceParam);
         if (isNaN(price)) {
             res.status(400).send(`The given price is not a number! price value: ${priceParam}`);

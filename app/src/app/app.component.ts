@@ -91,6 +91,7 @@ export class AppComponent {
 
   ngOnInit() {
     this.start();
+    this.paymentService.init(this.web3);
   }
 
   public async start() {
@@ -193,7 +194,9 @@ export class AppComponent {
           this.updateUI();
         }
         
-        this.paymentService.signPayment()
+        this.paymentService.signPayment(10,() => {
+          console.log("TEST");
+        });
         
       });
 

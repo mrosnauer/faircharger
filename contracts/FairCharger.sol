@@ -19,7 +19,7 @@ contract FairCharger {
 
 
   function symbol() public pure returns (string memory) {
-    return "Fair";
+    return "ChargeCoins";
   }
 
   function decimals() public pure returns (uint8) {

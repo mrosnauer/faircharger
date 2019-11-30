@@ -14,7 +14,7 @@ contract FairCharger {
         expiration = now + duration;
     }
 
-    function isValidSignature(uint256 amount, bytes memory signature)
+    constructor(uint256 amount, bytes memory signature)
         internal
         view
         returns (bool)

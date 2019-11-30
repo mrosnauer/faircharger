@@ -53,11 +53,6 @@ export class PaymentChannelService {
     
   }
 
-  private signMessage(message, callback) {
-    console.log(this.web3.eth);
-    
-    
-  }
 
   // contractAddress is used to prevent cross-contract replay attacks.
   // amount, in wei, specifies how much ether should be sent.

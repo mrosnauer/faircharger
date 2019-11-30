@@ -142,7 +142,7 @@ export class AppComponent {
     this.statusText = "Initiating transaction... (please wait)";
 
     const { transfer } = this.fairChargerContract.methods;
-    await transfer(this.chargerAccount, amount * 100).send({ from: this.account });
+    transfer(this.chargerAccount, amount * 100).send({ from: this.account });
   }
 
   public setStatus(message: any) {
@@ -180,7 +180,6 @@ export class AppComponent {
     this.initialSOC = 0;
     this.totalCost = 0;
     this.updateUI();
-    this.endCharging();
     this.showChargingInfo = false;
     this.statusText = "Bereit";
     this.statusColor = "green";

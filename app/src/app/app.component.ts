@@ -102,10 +102,15 @@ export class AppComponent {
         deployedNetwork.address,
       );
 
+      this.web3.eth.defaultAccount = this.web3.eth.accounts[0]
+      //personal.unlockAccount(web3.eth.defaultAccount)
+      //contractObj = web3.eth.contract(dhbwCoinArtifact.abi).at(contractAddr)
+      //contractObj.method(args...)
+
       // get accounts
       const accounts = await this.web3.eth.getAccounts();
       this.account = accounts[0];
-
+      console.log(accounts);
       this.refreshBalance();
     } catch (error) {
       console.error("Could not connect to contract or chain.");
@@ -114,6 +119,7 @@ export class AppComponent {
   }
 
   public async refreshBalance() {
+    console.log(this.fairChargerContract.methods);
     const { balanceOf, decimals } = this.fairChargerContract.methods;
     const balance = await balanceOf(this.account).call();
     const decimal = await decimals().call();

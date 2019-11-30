@@ -17,6 +17,7 @@ contract FairCharger {
     return "FairCharger";
   }
 
+
   function symbol() public pure returns (string memory) {
     return "Fair";
   }

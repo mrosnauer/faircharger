@@ -1,6 +1,6 @@
 import { Request, Response, Express } from 'express';
 import Web3 from 'web3';
-import * as dhbwCoinArtifact from '../../../build/contracts/FairCharger.json';
+import * as dhbwCoinArtifact from '../../build/contracts/FairCharger.json';
 import * as eUtils from 'ethereumjs-util';
 import * as eAbi from 'ethereumjs-abi';
 
@@ -23,6 +23,7 @@ export class ChargerManager {
     private idCounter: number;
     private web3: Web3;
     private fairChargerContract: any;
+
     constructor(private app: Express) {
         this.chargers = [];
         this.idCounter = 1;
@@ -30,10 +31,13 @@ export class ChargerManager {
         this.setupChain();
     }
 
+    /**
+     * connect to the chain
+     */
     private async setupChain() {
         try {
             const networkId = await this.web3.eth.net.getId();
-            const deployedNetwork = dhbwCoinArtifact.networks[networkId];
+            const deployedNetwork: any = dhbwCoinArtifact.networks[networkId];
             this.fairChargerContract = new this.web3.eth.Contract(
                 dhbwCoinArtifact.abi as any,
                 deployedNetwork.address,
@@ -44,8 +48,6 @@ export class ChargerManager {
             console.log('something went wrong while setting up the chain connection');
         }
     }
-
-
 
     /**
      * registerRoutes

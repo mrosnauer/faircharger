@@ -35,7 +35,7 @@ export class PaymentChannelService {
       from: driverAccount,
       gas: gas + 1,
       value: maxVal
-    }, callback);
+    }, () => callback());
     console.log("TE213123ST");
     return obj2;
 

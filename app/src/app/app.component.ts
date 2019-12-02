@@ -69,7 +69,10 @@ export class AppComponent {
   private account;
 
   chargerAccount;
+  chargerID;
   price = 0;
+
+  count = 0;
 
   /**
    * Update the Out-Values
@@ -96,14 +99,28 @@ export class AppComponent {
           this.endCharging();
         } else {
           const charged = 0.001;
-          this.paymentService.signPayment(charged * this.price * 1000000000000000000, () => {
+          this.paymentService.signPayment(charged * this.price * 1000000000000000000, (error, result) => {
+            this.service.sendPostRequest("/charger/" + this.chargerID + "/pay", {
+                message: result,
+                count: this.count
 
+            }).subscribe(
+              (data: any) => {
+                console.log("SUCCESS");
+              },
+              (error) => {
+                console.log('oops', error)
+                this.statusText = "Bei der Zahlungsübertragung zur Ladesäule ist ein Fehler aufgetreten";
+                this.statusColor = "red";
+              }
+            );
           });
           this.carSOCAbsolute += charged;
           this.totalCharge = this.carSOCAbsolute - this.initialSOC;
           this.totalCost = (this.carSOCAbsolute - this.initialSOC) * this.price;
           this.remainingBalance = this.currentBalance - this.totalCost;
           this.updateUI();
+          this.count++;
         }
 
 
@@ -176,6 +193,7 @@ export class AppComponent {
   }
 
   sendChargeRequest(chargerID: string) {
+    this.chargerID = chargerID;
     if (chargerID !== undefined && chargerID !== "") {
       this.service.sendGetRequest("/charger/" + chargerID).subscribe(
         (data: any) => {
@@ -210,6 +228,7 @@ export class AppComponent {
   }
 
   callback(err) {
+    this.paymentService.contractAddress = window.prompt("Bitte die Adresse des Contracts aus Ganache kopieren und hier einfügen","0xAB...");
     if (err == null) {
       //Da das untere callback nicht aufgerufen wird, wird die Adresse hier manuell gesetzt
       this.charging = true;
@@ -224,6 +243,7 @@ export class AppComponent {
       this.statusText = "Bei dem Deployment des Contracts ist ein Fehler aufgetreten:" + err;
       this.statusColor = "red";
     }
+    
   }
 
   startCharging() {
@@ -234,25 +254,12 @@ export class AppComponent {
     const maxCost = (this.carBatteryCap - this.carSOCAbsolute) * this.price;
     //Schätze Ladekosten
 
-    /*const callback = (err, transactionHash) => {
-      if (err == null) {
-        //Da das untere callback nicht aufgerufen wird, wird die Adresse hier manuell gesetzt
-        this.charging = true;
-        this.simulate = true;
-        this.showChargingInfo = true;
-        this.statusText = "Lade";
-        this.statusColor = "green";
-        this.initialSOC = this.carSOCAbsolute;
-        this.totalCost = 0;
-
-      } else {
-        this.statusText = "Bei dem Deployment des Contracts ist ein Fehler aufgetreten:" + err;
-        this.statusColor = "red";
-      }
-    }*/
+    const callback = (err, transactionHash) => {
+      this.callback(err);
+    }
 
     //Callback wird nicht aufgerufen...
-    this.paymentService.init(this.web3, this.account, this.chargerAccount, maxCost * 1000000000000000000, null).then((value:Contract) => {
+    this.paymentService.init(this.web3, this.account, this.chargerAccount, maxCost * 1000000000000000000, callback).then((value:Contract) => {
       //DAS HIER WIRD NICHT AUFGERUFEN
       //Siehe https://github.com/ethereum/web3.js/issues/2104
       this.callback(null);
@@ -263,8 +270,7 @@ export class AppComponent {
     });
 
     //DESWEGEN MUSS DIE ADRESSE MANUELLE EINGEGEBEN WERDEN
-    this.paymentService.contractAddress = window.prompt("Bitte die Adresse des Contracts aus Ganache kopieren und hier einfügen","0xAB...");
-    this.callback(null);
+    
 
   }
 

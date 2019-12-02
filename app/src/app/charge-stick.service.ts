@@ -13,4 +13,8 @@ export class ChargeStickService {
   public sendGetRequest(endpoint:string){
     return this.httpClient.get(this.REST_API_SERVER + endpoint);
   }
+
+  public sendPostRequest(endpoint:string, data){
+    return this.httpClient.post(this.REST_API_SERVER + endpoint,JSON.stringify(data));
+  }
 }

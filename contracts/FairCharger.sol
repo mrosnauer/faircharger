@@ -5,7 +5,7 @@ contract FairCharger {
     address payable public recipient;  // The account receiving the payments.
     uint256 public expiration; // Timeout in case the recipient never closes.
 
-    function initFairCharger(address payable _recipient, uint256 duration)
+    function SimplePaymentChannel(address payable _recipient, uint256 duration)
         public
         payable
     {
@@ -14,12 +14,12 @@ contract FairCharger {
         expiration = now + duration;
     }
 
-    constructor(uint256 amount, bytes memory signature)
+    function isValidSignature(uint256 amount, bytes memory signature)
         internal
         view
         returns (bool)
     {
-        bytes32 message = keccak256(abi.encodePacked(this, amount));
+        bytes32 message = prefixed(keccak256(abi.encodePacked(this, amount)));
 
         // Check that the signature is from the payment sender.
         return recoverSigner(message, signature) == sender;
@@ -35,8 +35,6 @@ contract FairCharger {
         recipient.transfer(amount);
         selfdestruct(sender);
     }
-
-    
 
     // The sender can extend the expiration at any time.
     function extend(uint256 newExpiration) public {

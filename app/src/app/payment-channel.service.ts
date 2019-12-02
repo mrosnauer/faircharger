@@ -20,7 +20,7 @@ export class PaymentChannelService {
   private contractAddress;
   private web3;
 
-  init(web3: Web3, maxVal) {
+  init(web3: Web3, driverAccount, chargeStickAccount,maxVal) {
     console.log("TESTER");
     this.web3 = web3;
     let contracts: any = fairCharger;
@@ -30,10 +30,10 @@ export class PaymentChannelService {
     let code = contracts.default.bytecode;
 
     const deploy = async () => {
-      const gas = await contract.deploy({ data: code, arguments: ["0x4Cc806EEaFD16e73b43DD201B6CB7122d1685cD5", 100] }).estimateGas();
+      const gas = await contract.deploy({ data: code, arguments: [chargeStickAccount, 100] }).estimateGas();
       console.log(gas);
-      const response = await contract.deploy({ data: code, arguments: ["0x4Cc806EEaFD16e73b43DD201B6CB7122d1685cD5", 100] }).send({
-        from: '0xA25758d9ec1EE1FEaeE1dE552e279599638ABDB3',
+      const response = await contract.deploy({ data: code, arguments: [chargeStickAccount, 100] }).send({
+        from: driverAccount,
         gas: gas + 1,
         value: maxVal
       });

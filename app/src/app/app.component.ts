@@ -115,7 +115,7 @@ export class AppComponent {
         await window.ethereum.enable();
         await this.setupChainConnection();
         //await this.refreshBalance();
-        this.paymentService.init(this.web3, new BN("1000000000000000000"));
+        
         // Acccounts now exposed
       } catch (error) {
         // User denied account access...
@@ -125,7 +125,6 @@ export class AppComponent {
     else if (window.web3) {
       this.web3 = new Web3(window.web3.currentProvider);
       this.setupChainConnection();
-      this.paymentService.init(this.web3, 1000000000000000000);
     }
     // Non-dapp browsers...
     else {
@@ -201,6 +200,7 @@ export class AppComponent {
     this.charging = true;
     this.statusText = "Lade...";
     this.statusColor = "green";
+    this.paymentService.init(this.web3, this.account, this.chargerAccount, new BN("1000000000000000000"));
     this.simulation = interval(50)
       .subscribe((val) => {
         if (this.carSOCAbsolute >= this.carBatteryCap) {

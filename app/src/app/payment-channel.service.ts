@@ -20,16 +20,25 @@ export class PaymentChannelService {
   private contractAddress;
   private web3;
 
-  init(web3: Web3) {
+  init(web3: Web3, maxVal) {
+    console.log("TESTER");
     this.web3 = web3;
-    let contracts:any = fairCharger;
-    let abi = contracts.default.abi
-    this.contractAddress = "0x8E8C5A8C9b866f77101C0054660A83A9A88D54c4";
-    let contract = new web3.eth.Contract(abi, this.contractAddress, {gas: 1000000});
+    let contracts: any = fairCharger;
+    let abi = contracts.default.abi;
+    let contract = new web3.eth.Contract(abi, null, { gas: 1000000 });
     let code = '0x' + contracts.default.bytecode;
     contract.deploy({
       data: code
+    }).send({
+      from: '0x1234567890123456789012345678901234567891',
+      gas: 1500000,
+      gasPrice: '30000000000000',
+      value: maxVal
+    }).then(function (newContractInstance) {
+      console.log(newContractInstance.options.address) // instance with the new contract address
+      this.contractAddress = newContractInstance.options.address;
     });
+
   }
 
   initializePaymentChannels(senderAccount: any, receiverAccount: any, nonce: any) {
@@ -46,12 +55,12 @@ export class PaymentChannelService {
       ["address", "uint256"],
       [this.contractAddress, amount],
     );*/
-    return ethereumjs.soliditySHA3(["address","uint"], [new BN(this.contractAddress.replace('x',''),16), amount]).toString('hex');
+    return ethereumjs.soliditySHA3(["address", "uint"], [new BN(this.contractAddress.replace('x', ''), 16), amount]).toString('hex');
     return ethereumjs.soliditySHA3(
-      [ "address", "address", "uint", "uint" ],
-      [ new BN("03d3ef18442361D220Cb14313D7B6e142dA276Ab", 16), 0, 1000, 1448075779 ]
+      ["address", "address", "uint", "uint"],
+      [new BN("03d3ef18442361D220Cb14313D7B6e142dA276Ab", 16), 0, 1000, 1448075779]
     ).toString('hex');
-    
+
   }
 
 
@@ -60,8 +69,8 @@ export class PaymentChannelService {
   signPayment(amount, callback) {
     var message = this.constructPaymentMessage(amount);
     this.web3.eth.getAccounts((error, accounts) => {
-      this.web3.eth.personal.sign("0x" + message.toString("hex"),accounts[0] ,
-      callback);
+      this.web3.eth.personal.sign("0x" + message.toString("hex"), accounts[0],
+        callback);
     });
     ;
   }

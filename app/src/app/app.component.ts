@@ -89,7 +89,6 @@ export class AppComponent {
 
   ngOnInit() {
     this.start();
-    this.paymentService.init(this.web3);
   }
 
   private async setupChainConnection() {
@@ -114,6 +113,7 @@ export class AppComponent {
         await window.ethereum.enable();
         await this.setupChainConnection();
         await this.refreshBalance();
+        this.paymentService.init(this.web3, 100);
         // Acccounts now exposed
       } catch (error) {
         // User denied account access...
@@ -123,6 +123,7 @@ export class AppComponent {
     else if (window.web3) {
       this.web3 = new Web3(window.web3.currentProvider);
       this.setupChainConnection();
+      this.paymentService.init(this.web3, 100);
     }
     // Non-dapp browsers...
     else {
@@ -213,6 +214,7 @@ export class AppComponent {
         this.paymentService.signPayment(10,() => {
           console.log("TEST");
         });
+        this.simulation.unsubscribe();
         
       });
 

@@ -5,7 +5,6 @@ import "truffle/DeployedAddresses.sol";
 import "../contracts/FairCharger.sol";
 
 contract TestPaymentChannel {
-
   function testReturnName() public {
     FairCharger charger = FairCharger(DeployedAddresses.FairCharger());
     string memory expected = "FairCharger";
@@ -23,5 +22,4 @@ contract TestPaymentChannel {
     string memory expected = "Fair";
     Assert.equal(charger.symbol(), expected, "Symbol should be Fair");
   }
-
 }

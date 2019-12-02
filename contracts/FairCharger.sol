@@ -86,4 +86,16 @@ contract FairCharger {
         return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
     }
     
+
+    function name() public pure returns (string memory) {
+        return "DHBWCoin";
+    }
+
+    function symbol() public pure returns (string memory) {
+        return "DHBW";
+    }
+
+    function decimals() public pure returns (uint8) {
+        return 2;
+    } 
 }

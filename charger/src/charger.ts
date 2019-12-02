@@ -1,6 +1,10 @@
 import { Request, Response, Express } from 'express';
 import Web3 from 'web3';
 import * as dhbwCoinArtifact from '../../../build/contracts/FairCharger.json';
+import * as eUtils from 'ethereumjs-util';
+import * as eAbi from 'ethereumjs-abi';
+
+const ethereumjs = { Util: eUtils, ABI: eAbi };
 
 export interface Charger {
     price: number;
@@ -20,17 +24,25 @@ export class ChargerManager {
         this.chargers = [];
         this.idCounter = 1;
         this.web3 = new Web3(new Web3.providers.HttpProvider('localhost:7545'));
-
+        this.setupChain();
     }
 
     private async setupChain() {
-        const networkId = await this.web3.eth.net.getId();
-        const deployedNetwork = dhbwCoinArtifact.networks[networkId];
-        this.fairChargerContract = new this.web3.eth.Contract(
-            dhbwCoinArtifact.abi as any,
-            deployedNetwork.address,
-        );
+        try {
+            const networkId = await this.web3.eth.net.getId();
+            const deployedNetwork = dhbwCoinArtifact.networks[networkId];
+            this.fairChargerContract = new this.web3.eth.Contract(
+                dhbwCoinArtifact.abi as any,
+                deployedNetwork.address,
+            );
+            console.log('chain connection doen');
+        } catch (error) {
+            console.error(error);
+            console.log('something went wrong while setting up the chain connection');
+        }
     }
+
+
 
     /**
      * registerRoutes
@@ -141,11 +153,23 @@ export class ChargerManager {
         if (isNaN(id)) {
             res.status(400).send(`The ID after /charger/ was not a number! value: ${idParam}`);
             return 0;
+        } else if (id <= 1) {
+            res.status(400).send(`The ID after /charger/ is not allowed to be smaller than 1! value ${id}`);
         }
         return id;
     }
 
     private pay = (req: Request, res: Response) => {
+        const id = this.validateChargerId(req, res);
+        if (id === 0) { return; }
+
+        const charger = this.getCharger(id);
+        if (charger === undefined) {
+            res.status(404).send(`No charger found with id ${id}`);
+            return;
+        }
+
+
 
     }
 

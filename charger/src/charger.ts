@@ -14,7 +14,7 @@ export interface Charger {
 interface InternalCharger extends Charger {
     id: number;
     //last valid payment for each sender accountID
-    lastValidPayment: { amount: number, message: string };
+    lastValidPayment: { amount: number; message: string };
 
 }
 
@@ -37,7 +37,13 @@ export class ChargerManager {
     private async setupChain() {
         try {
             const networkId = await this.web3.eth.net.getId();
-            const deployedNetwork = dhbwCoinArtifact.networks[networkId];
+
+
+            // this hack is needed to satisfy typescript
+            const networks: any = dhbwCoinArtifact.networks;
+            const deployedNetwork = networks[networkId];
+
+
             this.fairChargerContract = new this.web3.eth.Contract(
                 dhbwCoinArtifact.abi as any,
                 deployedNetwork.address,
@@ -200,11 +206,11 @@ export class ChargerManager {
     private pay = async (req: Request, res: Response, charger: InternalCharger): Promise<boolean | undefined> => {
         const { message: messageParam, count: countParam } = req.body;
         if (messageParam === undefined) {
-            res.status(404).send(`No message in request body!`);
+            res.status(404).send('No message in request body!');
             return;
         }
         if (countParam === undefined) {
-            res.status(404).send(`No count in request body!`);
+            res.status(404).send('No count in request body!');
             return;
         }
         const count = Number(countParam);
@@ -224,10 +230,10 @@ export class ChargerManager {
 
         // only return true if the message is valid
         if (await isValidSignature(messageParam, amount)) {
-            charger.lastValidPayment = { amount, message: messageParam }
+            charger.lastValidPayment = { amount, message: messageParam };
             return true;
         }
-        res.status(404).send(`the message is not valid`);
+        res.status(404).send('the message is not valid');
     }
 
 }

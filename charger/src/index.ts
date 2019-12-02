@@ -20,8 +20,8 @@ app.get('/', (req, res) => {
 const chargerManager = new ChargerManager(app);
 chargerManager.registerRoutes();
 const result = chargerManager.createCharger({
-    accountID: '0x03d3ef18442361D220Cb14313D7B6e142dA276Ab',
-    price: 23
+    accountID: '0x0C5777CD1eB5753A82fF8Bd5ace695bd10EBBFef',
+    price: 15
 });
 console.log(JSON.stringify(result));
 

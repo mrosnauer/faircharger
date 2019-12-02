@@ -1,7 +1,7 @@
 <h1>FairCharger</h1>
 <!--Infos zum Account und Auto-->
 <div>
-    <div>Aktueller Kontostand: {{currentBalanceOut}} Ether</div>
+    <div>Aktueller Kontostand: {{currentBalanceOut}} ChargeCoins</div>
     <div>Aktueller Ladezustand: {{carSOCPercentOut}} % / {{carSOCAbsoluteOut}} kWh</div>
 </div>
 <br>
@@ -16,8 +16,8 @@
 
 <!--Ladesäulen-Info: ID und Preis-->
 <div *ngIf="showPriceInfo">
-    <div>Ladesäulen-ID: {{chargeAccount}}</div>
-    <div>Preis: {{price}} Ether pro kWh</div>
+    <div>Ladesäulen-ID: {{chargerAccount}}</div>
+    <div>Preis: {{price}} ChargeCoins pro kWh</div>
     <button [disabled]="charging" type="submit" (click)='startCharging()'>Ladevorgang starten</button>
     <button [disabled]="charging" type="submit" (click)='declinePrice()'>Ladesäule trennen</button>
 </div>
@@ -25,8 +25,8 @@
 <!--Ladeinfo: Geladener Strom und Preis-->
 <div *ngIf="showChargingInfo">
     <div style="color:green">Geladener Strom {{totalChargeOut}} kWh</div>
-    <div style="color:red">Kosten {{totalCostOut}} Ether</div>
-    <div>Übriger Kontostand {{totalCostOut}} Ether</div>
+    <div style="color:red">Kosten {{totalCostOut}} ChargeCoins</div>
+    <div>Übriger Kontostand {{totalCostOut}} ChargeCoins</div>
     <button *ngIf="charging" type="submit" (click)='endCharging()'>Abschließen und bezahlen...</button>
 </div>
 <br>

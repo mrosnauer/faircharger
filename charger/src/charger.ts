@@ -233,7 +233,7 @@ export class ChargerManager {
             charger.lastValidPayment = { amount, message: messageParam };
             return true;
         }
-        res.status(404).send('the message is not valid');
+        res.status(400).send('the message is not valid');
     }
 
 }

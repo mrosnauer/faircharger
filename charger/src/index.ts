@@ -21,8 +21,8 @@ const chargerManager = new ChargerManager(app);
 chargerManager.registerRoutes();
 
 console.log(chargerManager.createCharger({
-    accountID: '0x0C5777CD1eB5753A82fF8Bd5ace695bd10EBBFef',
-    price: 15
+    accountID: '0x4Cc806EEaFD16e73b43DD201B6CB7122d1685cD5',
+    price: 16
 }));
 
 

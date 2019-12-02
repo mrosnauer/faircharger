@@ -68,14 +68,16 @@ export class AppComponent {
   private fairChargerContract;
   private account;
 
+  //charger infos
   chargerAccount;
   chargerID;
   price = 0;
 
-  count = 0;
+  //Counts transactions
+  count = 1;
 
   /**
-   * Update the Out-Values
+   * Update the UI -> calculate string values
    */
   private updateUI() {
     this.carSOCPercent = this.carSOCAbsolute / this.carBatteryCap * 100;
@@ -88,17 +90,35 @@ export class AppComponent {
 
 
 
+  /**
+   * Dependency injection
+   * @param web3 web3
+   * @param service service to communicate to the backend
+   * @param paymentService service to do payment channel
+   */
   constructor(@Inject(WEB3) private web3: Web3, private service: ChargeStickService, private paymentService: PaymentChannelService) {
   }
 
+  /**
+   * ngOnInit-called when page loads
+   */
   ngOnInit() {
     this.start();
-    this.simulation = interval(50).subscribe((val) => {
+    this.simulation = interval(10000).subscribe((val) => {
       if (this.simulate) {
         if (this.carSOCAbsolute >= this.carBatteryCap) {
           this.endCharging();
         } else {
           const charged = 0.001;
+          
+          //Simulate charging
+          this.carSOCAbsolute += charged;
+          this.totalCharge = this.carSOCAbsolute - this.initialSOC;
+          this.totalCost = (this.carSOCAbsolute - this.initialSOC) * this.price;
+          this.remainingBalance = this.currentBalance - this.totalCost;
+          this.updateUI();
+
+          //Pay and send to charge stick (off-chain)
           this.paymentService.signPayment(charged * this.price * 1000000000000000000, (error, result) => {
             this.service.sendPostRequest("/charger/" + this.chargerID + "/pay", {
                 message: result,
@@ -106,29 +126,23 @@ export class AppComponent {
 
             }).subscribe(
               (data: any) => {
-                console.log("SUCCESS");
               },
               (error) => {
-                console.log('oops', error)
                 this.statusText = "Bei der Zahlungsübertragung zur Ladesäule ist ein Fehler aufgetreten";
                 this.statusColor = "red";
               }
             );
           });
-          this.carSOCAbsolute += charged;
-          this.totalCharge = this.carSOCAbsolute - this.initialSOC;
-          this.totalCost = (this.carSOCAbsolute - this.initialSOC) * this.price;
-          this.remainingBalance = this.currentBalance - this.totalCost;
-          this.updateUI();
+
           this.count++;
         }
-
-
-        this.simulation.unsubscribe();
       }
     });
   }
 
+  /**
+   * Setup the connection to the blockchain
+   */
   private async setupChainConnection() {
     const networkId = await this.web3.eth.net.getId();
     const deployedNetwork = dhbwCoinArtifact.networks[networkId];
@@ -143,6 +157,9 @@ export class AppComponent {
 
   }
 
+  /**
+   * Method to be called when page loads. Setup blockchain connection
+   */
   public async start() {
     if (window.ethereum) {
       this.web3 = new Web3(window.ethereum);
@@ -169,6 +186,9 @@ export class AppComponent {
     this.updateUI();
   }
 
+  /**
+   * Refreshes the balance
+   */
   public async refreshBalance() {
     const { balanceOf, decimals, name } = this.fairChargerContract.methods;
     const nameT = await name().call();
@@ -180,18 +200,11 @@ export class AppComponent {
     this.currentBalance = decimal;
   }
 
-  public async send(amount: any) {
-    this.statusText = "Initiating transaction... (please wait)";
 
-    const { transfer } = this.fairChargerContract.methods;
-    transfer(this.chargerAccount, amount * 100).send({ from: this.account });
-  }
-
-  public setStatus(message: any) {
-    const status = document.getElementById("status");
-    status.innerHTML = message;
-  }
-
+  /**
+   * Sends a request to a charger with a specific ID
+   * @param chargerID the ID of the charger
+   */
   sendChargeRequest(chargerID: string) {
     this.chargerID = chargerID;
     if (chargerID !== undefined && chargerID !== "") {
@@ -214,6 +227,10 @@ export class AppComponent {
     }
   }
 
+  /**
+   * Button-Handler: User declines price
+   * Resets all UI-Values
+   */
   declinePrice() {
     this.showPriceInfo = false;
     this.chargerAccount = null;
@@ -227,10 +244,14 @@ export class AppComponent {
     this.statusColor = "green";
   }
 
+  /**
+   * Callback-Handler after deploying payment channel contract
+   * @param err error, if existing
+   */
   callback(err) {
     this.paymentService.contractAddress = window.prompt("Bitte die Adresse des Contracts aus Ganache kopieren und hier einfügen","0xAB...");
     if (err == null) {
-      //Da das untere callback nicht aufgerufen wird, wird die Adresse hier manuell gesetzt
+      //Reset all values
       this.charging = true;
       this.simulate = true;
       this.showChargingInfo = true;
@@ -243,21 +264,24 @@ export class AppComponent {
       this.statusText = "Bei dem Deployment des Contracts ist ein Fehler aufgetreten:" + err;
       this.statusColor = "red";
     }
-    
   }
 
+  /**
+   * Button-Handler: Starte den Ladevorgang
+   */
   startCharging() {
-    //Öffne Payment Channel
+    //Statustext setzen
     this.statusText = "Öffne Payment Channel...";
     this.statusColor = "black";
-
-    const maxCost = (this.carBatteryCap - this.carSOCAbsolute) * this.price;
     //Schätze Ladekosten
-
+    const maxCost = (this.carBatteryCap - this.carSOCAbsolute) * this.price;
+    
+    //Behelfs-Callback, wegen Problem unten
     const callback = (err, transactionHash) => {
       this.callback(err);
     }
 
+    //Öffne Payment Channel
     //Callback wird nicht aufgerufen...
     this.paymentService.init(this.web3, this.account, this.chargerAccount, maxCost * 1000000000000000000, callback).then((value:Contract) => {
       //DAS HIER WIRD NICHT AUFGERUFEN
@@ -268,32 +292,17 @@ export class AppComponent {
       //DAS HIER AUCH NICHT...
       //Siehe https://github.com/ethereum/web3.js/issues/2104
     });
-
-    //DESWEGEN MUSS DIE ADRESSE MANUELLE EINGEGEBEN WERDEN
-    
-
   }
 
+  /**
+   * Called when the charge process ended. (Button handler)
+   */
   endCharging() {
-    if (this.simulation) {
-      this.statusText = "Ladevorgang abgeschlossen! Vervollständige Zahlung";
+    //Stop simulation if running
+    if (this.simulate) {
+      this.statusText = "Ladevorgang abgeschlossen!";
       this.statusColor = "black";
-      this.simulate = false;
-      this.totalCost = Math.round(this.totalCost * 100) / 100;
-      this.send(this.totalCost.toFixed(2)).then(() => {
-        this.statusText = "Zahlung erfolgreich";
-        this.statusColor = "black";
-      }).catch(() => {
-        this.statusText = "Zahlung fehlerhaft";
-        this.statusColor = "red";
-      }).finally(() => {
-        this.charging = false;
-        this.showChargingInfo = false;
-        this.refreshBalance();
-      });
-
+      this.simulate = false;    
     }
-
-
   }
 }

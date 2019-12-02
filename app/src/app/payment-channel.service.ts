@@ -26,18 +26,58 @@ export class PaymentChannelService {
     let contracts: any = fairCharger;
     let abi = contracts.default.abi;
     let contract = new web3.eth.Contract(abi, null, { gas: 1000000 });
-    let code = '0x' + contracts.default.bytecode;
-    contract.deploy({
+    contract.transactionConfirmationBlocks = 1;
+    let code = contracts.default.bytecode;
+
+    const deploy = async () => {
+      const gas = await contract.deploy({data: code}).estimateGas();
+      const response = await contract.deploy({data: code}).send({
+        from: '0xA25758d9ec1EE1FEaeE1dE552e279599638ABDB3',
+        gas: gas + 1,
+        value: maxVal
+      });
+    
+      console.log('Contract deployed to:', response.options.address);
+    
+      return response;
+    };
+    
+    deploy().then((contractClone) => {
+      console.log('CLONED-CONTRACT: ', contractClone);
+    
+    }).catch(console.log);
+
+    /*contract.deploy({
       data: code
     }).send({
-      from: '0x1234567890123456789012345678901234567891',
+      from: '0xc63a3709bD763ea9875505EBBA761E85FCE13f19',
       gas: 1500000,
       gasPrice: '30000000000000',
       value: maxVal
-    }).then(function (newContractInstance) {
-      console.log(newContractInstance.options.address) // instance with the new contract address
+    }, (error, transactionHash) => {
+      console.log("Error");
+    }).on('error', function(error){ 
+      console.log("ERROR");
+    }).on('transactionHash', function(transactionHash){
+      console.log("ERROR2");
+     })
+    .on('receipt', function(receipt){
+       console.log(receipt.contractAddress) // contains the new contract address
+    })
+    .on('confirmation', function(confirmationNumber, receipt) {
+      console.log("TEST345");
+    })
+    .then(function(newContractInstance){
+        console.log(newContractInstance.options.address) // instance with the new contract address
+    });*/
+    
+    
+    /*.then(function (newContractInstance) {
+      console.log(newContractInstance.options.address); // instance with the new contract address
       this.contractAddress = newContractInstance.options.address;
-    });
+    }).catch((error) => {
+      console.log(error);
+    });*/
 
   }
 

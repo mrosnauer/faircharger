@@ -112,8 +112,8 @@ export class AppComponent {
         // Request account access if needed
         await window.ethereum.enable();
         await this.setupChainConnection();
-        await this.refreshBalance();
-        this.paymentService.init(this.web3, 100);
+        //await this.refreshBalance();
+        this.paymentService.init(this.web3, 1000000000000000000);
         // Acccounts now exposed
       } catch (error) {
         // User denied account access...
@@ -123,7 +123,7 @@ export class AppComponent {
     else if (window.web3) {
       this.web3 = new Web3(window.web3.currentProvider);
       this.setupChainConnection();
-      this.paymentService.init(this.web3, 100);
+      this.paymentService.init(this.web3, 1000000000000000000);
     }
     // Non-dapp browsers...
     else {
@@ -211,7 +211,7 @@ export class AppComponent {
           this.updateUI();
         }
         
-        this.paymentService.signPayment(10,() => {
+        this.paymentService.signPayment(1000,() => {
           console.log("TEST");
         });
         this.simulation.unsubscribe();

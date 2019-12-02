@@ -26,25 +26,26 @@ export class PaymentChannelService {
     let contracts: any = fairCharger;
     let abi = contracts.default.abi;
     let contract = new web3.eth.Contract(abi, null, { gas: 1000000 });
-    contract.transactionConfirmationBlocks = 1;
+    //contract.transactionConfirmationBlocks = 1;
     let code = contracts.default.bytecode;
 
     const deploy = async () => {
-      const gas = await contract.deploy({data: code}).estimateGas();
-      const response = await contract.deploy({data: code}).send({
+      const gas = await contract.deploy({ data: code, arguments: ["0x4Cc806EEaFD16e73b43DD201B6CB7122d1685cD5", 100] }).estimateGas();
+      console.log(gas);
+      const response = await contract.deploy({ data: code, arguments: ["0x4Cc806EEaFD16e73b43DD201B6CB7122d1685cD5", 100] }).send({
         from: '0xA25758d9ec1EE1FEaeE1dE552e279599638ABDB3',
         gas: gas + 1,
         value: maxVal
       });
-    
+
       console.log('Contract deployed to:', response.options.address);
-    
+
       return response;
     };
-    
+
     deploy().then((contractClone) => {
       console.log('CLONED-CONTRACT: ', contractClone);
-    
+
     }).catch(console.log);
 
     /*contract.deploy({
@@ -70,8 +71,8 @@ export class PaymentChannelService {
     .then(function(newContractInstance){
         console.log(newContractInstance.options.address) // instance with the new contract address
     });*/
-    
-    
+
+
     /*.then(function (newContractInstance) {
       console.log(newContractInstance.options.address); // instance with the new contract address
       this.contractAddress = newContractInstance.options.address;

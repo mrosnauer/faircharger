@@ -8,6 +8,8 @@ import { ChargeStickService } from './charge-stick.service.js';
 import { Observable, interval } from 'rxjs';
 import { PaymentChannelService } from './payment-channel.service';
 
+var BN = require('bn.js')
+
 declare global {
   interface Window { web3: Web3; ethereum: any }
 }
@@ -113,7 +115,7 @@ export class AppComponent {
         await window.ethereum.enable();
         await this.setupChainConnection();
         //await this.refreshBalance();
-        this.paymentService.init(this.web3, 1000000000000000000);
+        this.paymentService.init(this.web3, new BN("1000000000000000000"));
         // Acccounts now exposed
       } catch (error) {
         // User denied account access...

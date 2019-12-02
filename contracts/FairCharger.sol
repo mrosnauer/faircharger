@@ -5,7 +5,7 @@ contract FairCharger {
     address payable public recipient;  // The account receiving the payments.
     uint256 public expiration; // Timeout in case the recipient never closes.
 
-    function SimplePaymentChannel(address payable _recipient, uint256 duration)
+    constructor(address payable _recipient, uint256 duration)
         public
         payable
     {

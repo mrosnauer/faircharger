@@ -13,6 +13,9 @@ export interface Charger {
 
 interface InternalCharger extends Charger {
     id: number;
+    //last valid payment for each sender accountID
+    lastValidPayment: { amount: number, message: string };
+
 }
 
 export class ChargerManager {
@@ -53,7 +56,7 @@ export class ChargerManager {
         this.app.get('/charger/:id', this.routGetCharger);
         this.app.put('/charger/:id', this.routUpdateCharger);
         this.app.delete('/charger/:id', this.routDeleteCharger);
-        this.app.post('/charger/:id/pay', this.pay);
+        this.app.post('/charger/:id/pay', this.payWrap);
     }
 
     public getAllCharger() {
@@ -65,7 +68,7 @@ export class ChargerManager {
     }
 
     public createCharger(chargerData: Charger) {
-        const charger: InternalCharger = Object.assign({ id: this.idCounter++ }, chargerData);
+        const charger: InternalCharger = Object.assign({ id: this.idCounter++, lastValidPayment: { amount: 0, message: '' } }, chargerData);
         this.chargers.push(charger);
         return charger;
     }
@@ -86,9 +89,12 @@ export class ChargerManager {
         return count === this.chargers.length;
     }
 
+    private reduce(charger: InternalCharger): Charger {
+        return { price: charger.price, accountID: charger.accountID };
+    }
 
     private routGetAllCharger = (req: Request, res: Response) => {
-        res.send(this.getAllCharger());
+        res.send(this.getAllCharger().map(this.reduce));
     }
 
     private routGetCharger = (req: Request, res: Response) => {
@@ -99,7 +105,7 @@ export class ChargerManager {
             res.status(404).send(`No charger found with id ${id}`);
             return;
         }
-        res.send(charger);
+        res.send(this.reduce(charger));
     }
 
     private routUpdateCharger = (req: Request, res: Response) => {
@@ -131,7 +137,7 @@ export class ChargerManager {
         if (typeof (result) === 'string') {
             res.status(400).send(result);
         } else {
-            res.send(charger);
+            res.send(this.reduce(result));
         }
     }
 
@@ -159,18 +165,60 @@ export class ChargerManager {
         return id;
     }
 
-    private pay = (req: Request, res: Response) => {
-        const id = this.validateChargerId(req, res);
-        if (id === 0) { return; }
+    private payWrap = async (req: Request, res: Response) => {
+        try {
+            const id = this.validateChargerId(req, res);
+            if (id === 0) { return; }
 
-        const charger = this.getCharger(id);
-        if (charger === undefined) {
-            res.status(404).send(`No charger found with id ${id}`);
+            const charger = this.getCharger(id);
+            if (charger === undefined) {
+                res.status(404).send(`No charger found with id ${id}`);
+                return;
+            }
+
+            if (await this.pay(req, res, charger) === undefined) {
+                const { close } = this.fairChargerContract.methods;
+                await close(charger.lastValidPayment.amount, charger.lastValidPayment.message);
+            } else {
+                res.status(200).send();
+            }
+        } catch (error) {
+            console.error(error);
+            console.log('some error in payWrap happend');
+        }
+    }
+
+    private pay = async (req: Request, res: Response, charger: InternalCharger) => {
+        const { message: messageParam, count: countParam } = req.body;
+        if (messageParam === undefined) {
+            res.status(404).send(`No message in request body!`);
+            return;
+        }
+        if (countParam === undefined) {
+            res.status(404).send(`No count in request body!`);
+            return;
+        }
+        const count = Number(countParam);
+        if (isNaN(count)) {
+            res.status(404).send(`Count is not a number! value: ${countParam}`);
+            return;
+        }
+        if (count < 0) {
+            res.status(404).send(`Count cannot be smaller than 0! value: ${count}`);
             return;
         }
 
+        // this calculation should be done by reading the creation datetime of the opening transaction
+        // with this it is not needed to extract the datetime, but its not safe
+        const amount = count * charger.price;
+        const { isValidSignature } = this.fairChargerContract.methods;
 
-
+        // only return true if the message is valid
+        if (await isValidSignature(messageParam, amount)) {
+            charger.lastValidPayment = { amount, message: messageParam }
+            return true;
+        }
+        res.status(404).send(`the message is not valid`);
     }
 
 }

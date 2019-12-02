@@ -37,7 +37,7 @@ export class ChargerManager {
     private async setupChain() {
         try {
             const networkId = await this.web3.eth.net.getId();
-            const deployedNetwork: any = dhbwCoinArtifact.networks[networkId];
+            const deployedNetwork = dhbwCoinArtifact.networks[networkId];
             this.fairChargerContract = new this.web3.eth.Contract(
                 dhbwCoinArtifact.abi as any,
                 deployedNetwork.address,
@@ -91,6 +91,10 @@ export class ChargerManager {
         return count === this.chargers.length;
     }
 
+    /**
+     * convert an internal to an external charger
+     * @param charger external object
+     */
     private reduce(charger: InternalCharger): Charger {
         return { price: charger.price, accountID: charger.accountID };
     }
@@ -167,6 +171,9 @@ export class ChargerManager {
         return id;
     }
 
+    /**
+     * wraps the pay method to close the connection if something goes wrong and handle errors
+     */
     private payWrap = async (req: Request, res: Response) => {
         try {
             const id = this.validateChargerId(req, res);
@@ -190,7 +197,7 @@ export class ChargerManager {
         }
     }
 
-    private pay = async (req: Request, res: Response, charger: InternalCharger) => {
+    private pay = async (req: Request, res: Response, charger: InternalCharger): Promise<boolean | undefined> => {
         const { message: messageParam, count: countParam } = req.body;
         if (messageParam === undefined) {
             res.status(404).send(`No message in request body!`);

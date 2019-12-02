@@ -17,19 +17,19 @@ contract TestPaymentChannel {
   function testReturnName() public {
     FairCharger charger = FairCharger(DeployedAddresses.FairCharger());
     string memory expected = "FairCharger";
-    Assert.equal(charger.name(), expected, "Name of Application is FairCharger");
+    Assert.equal(charger.name(), expected, "Name of Application should be FairCharger");
   }
 
   function testDecimals() public {
     FairCharger charger = FairCharger(DeployedAddresses.FairCharger());
     uint expected = 2;
-    Assert.equal(charger.decimals(), expected, "Cut 2 decimals");
+    Assert.equal(charger.decimals(), expected, "It should cut 2 decimals");
   }
 
   function testSymbol() public {
     FairCharger charger = FairCharger(DeployedAddresses.FairCharger());
     string memory expected = "Fair";
-    Assert.equal(charger.symbol(), expected, "Symbol is Fair");
+    Assert.equal(charger.symbol(), expected, "Symbol should be Fair");
   }
 
   function testTransferSender() public {

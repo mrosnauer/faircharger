@@ -16,7 +16,7 @@
 
 <!--Ladesäulen-Info: ID und Preis-->
 <div *ngIf="showPriceInfo">
-    <div>Ladesäulen-ID: {{chargeAccount}}</div>
+    <div>Ladesäulen-ID: {{chargerAccount}}</div>
     <div>Preis: {{price}} ChargeCoins pro kWh</div>
     <button [disabled]="charging" type="submit" (click)='startCharging()'>Ladevorgang starten</button>
     <button [disabled]="charging" type="submit" (click)='declinePrice()'>Ladesäule trennen</button>

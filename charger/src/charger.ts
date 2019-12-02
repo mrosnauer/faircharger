@@ -1,5 +1,10 @@
 import { Request, Response, Express } from 'express';
 import Web3 from 'web3';
+import * as dhbwCoinArtifact from '../../../build/contracts/FairCharger.json';
+import * as eUtils from 'ethereumjs-util';
+import * as eAbi from 'ethereumjs-abi';
+
+const ethereumjs = { Util: eUtils, ABI: eAbi };
 
 export interface Charger {
     price: number;
@@ -8,25 +13,50 @@ export interface Charger {
 
 interface InternalCharger extends Charger {
     id: number;
+    //last valid payment for each sender accountID
+    lastValidPayment: { amount: number, message: string };
+
 }
 
 export class ChargerManager {
     private chargers: InternalCharger[];
     private idCounter: number;
+    private web3: Web3;
+    private fairChargerContract: any;
     constructor(private app: Express) {
         this.chargers = [];
         this.idCounter = 1;
+        this.web3 = new Web3(new Web3.providers.HttpProvider('localhost:7545'));
+        this.setupChain();
     }
+
+    private async setupChain() {
+        try {
+            const networkId = await this.web3.eth.net.getId();
+            const deployedNetwork = dhbwCoinArtifact.networks[networkId];
+            this.fairChargerContract = new this.web3.eth.Contract(
+                dhbwCoinArtifact.abi as any,
+                deployedNetwork.address,
+            );
+            console.log('chain connection doen');
+        } catch (error) {
+            console.error(error);
+            console.log('something went wrong while setting up the chain connection');
+        }
+    }
+
+
 
     /**
      * registerRoutes
      */
-    public registerRoutes() {
+    public registerRoutes(): void {
         this.app.get('/charger', this.routGetAllCharger);
         this.app.post('/charger', this.routCreateCharger);
         this.app.get('/charger/:id', this.routGetCharger);
         this.app.put('/charger/:id', this.routUpdateCharger);
         this.app.delete('/charger/:id', this.routDeleteCharger);
+        this.app.post('/charger/:id/pay', this.payWrap);
     }
 
     public getAllCharger() {
@@ -38,7 +68,7 @@ export class ChargerManager {
     }
 
     public createCharger(chargerData: Charger) {
-        const charger: InternalCharger = Object.assign({ id: this.idCounter++ }, chargerData);
+        const charger: InternalCharger = Object.assign({ id: this.idCounter++, lastValidPayment: { amount: 0, message: '' } }, chargerData);
         this.chargers.push(charger);
         return charger;
     }
@@ -59,9 +89,12 @@ export class ChargerManager {
         return count === this.chargers.length;
     }
 
+    private reduce(charger: InternalCharger): Charger {
+        return { price: charger.price, accountID: charger.accountID };
+    }
 
     private routGetAllCharger = (req: Request, res: Response) => {
-        res.send(this.getAllCharger());
+        res.send(this.getAllCharger().map(this.reduce));
     }
 
     private routGetCharger = (req: Request, res: Response) => {
@@ -72,7 +105,7 @@ export class ChargerManager {
             res.status(404).send(`No charger found with id ${id}`);
             return;
         }
-        res.send(charger);
+        res.send(this.reduce(charger));
     }
 
     private routUpdateCharger = (req: Request, res: Response) => {
@@ -104,7 +137,7 @@ export class ChargerManager {
         if (typeof (result) === 'string') {
             res.status(400).send(result);
         } else {
-            res.send(charger);
+            res.send(this.reduce(result));
         }
     }
 
@@ -126,7 +159,66 @@ export class ChargerManager {
         if (isNaN(id)) {
             res.status(400).send(`The ID after /charger/ was not a number! value: ${idParam}`);
             return 0;
+        } else if (id <= 1) {
+            res.status(400).send(`The ID after /charger/ is not allowed to be smaller than 1! value ${id}`);
         }
         return id;
     }
+
+    private payWrap = async (req: Request, res: Response) => {
+        try {
+            const id = this.validateChargerId(req, res);
+            if (id === 0) { return; }
+
+            const charger = this.getCharger(id);
+            if (charger === undefined) {
+                res.status(404).send(`No charger found with id ${id}`);
+                return;
+            }
+
+            if (await this.pay(req, res, charger) === undefined) {
+                const { close } = this.fairChargerContract.methods;
+                await close(charger.lastValidPayment.amount, charger.lastValidPayment.message);
+            } else {
+                res.status(200).send();
+            }
+        } catch (error) {
+            console.error(error);
+            console.log('some error in payWrap happend');
+        }
+    }
+
+    private pay = async (req: Request, res: Response, charger: InternalCharger) => {
+        const { message: messageParam, count: countParam } = req.body;
+        if (messageParam === undefined) {
+            res.status(404).send(`No message in request body!`);
+            return;
+        }
+        if (countParam === undefined) {
+            res.status(404).send(`No count in request body!`);
+            return;
+        }
+        const count = Number(countParam);
+        if (isNaN(count)) {
+            res.status(404).send(`Count is not a number! value: ${countParam}`);
+            return;
+        }
+        if (count < 0) {
+            res.status(404).send(`Count cannot be smaller than 0! value: ${count}`);
+            return;
+        }
+
+        // this calculation should be done by reading the creation datetime of the opening transaction
+        // with this it is not needed to extract the datetime, but its not safe
+        const amount = count * charger.price;
+        const { isValidSignature } = this.fairChargerContract.methods;
+
+        // only return true if the message is valid
+        if (await isValidSignature(messageParam, amount)) {
+            charger.lastValidPayment = { amount, message: messageParam }
+            return true;
+        }
+        res.status(404).send(`the message is not valid`);
+    }
+
 }

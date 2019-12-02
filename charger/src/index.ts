@@ -19,11 +19,11 @@ app.get('/', (req, res) => {
 
 const chargerManager = new ChargerManager(app);
 chargerManager.registerRoutes();
-const result = chargerManager.createCharger({
+
+console.log(chargerManager.createCharger({
     accountID: '0x0C5777CD1eB5753A82fF8Bd5ace695bd10EBBFef',
-    price: 0.01
-});
-console.log(JSON.stringify(result));
+    price: 15
+}));
 
 
 // start the Express server

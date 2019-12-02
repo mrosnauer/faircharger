@@ -27,7 +27,7 @@ export class ChargerManager {
     constructor(private app: Express) {
         this.chargers = [];
         this.idCounter = 1;
-        this.web3 = new Web3(new Web3.providers.HttpProvider('localhost:7545'));
+        this.web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:7545'));
         this.setupChain();
     }
 

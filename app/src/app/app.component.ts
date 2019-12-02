@@ -78,12 +78,8 @@ export class AppComponent {
     this.totalCostOut = this.totalCost.toFixed(2);
     this.carSOCAbsoluteOut = this.carSOCAbsolute.toFixed(2);
     this.totalChargeOut = this.totalCharge.toFixed(2);
-
     this.remainingBalanceOut = this.remainingBalance.toFixed(2);
-
   }
-
-
 
   constructor(@Inject(WEB3) private web3: Web3, private service: ChargeStickService) {
   }
@@ -92,30 +88,49 @@ export class AppComponent {
     this.start();
   }
 
-  public async start() {
-    try {
-      // get contract instance
-      const networkId = await this.web3.eth.net.getId();
-      const deployedNetwork = dhbwCoinArtifact.networks[networkId];
-      this.fairChargerContract = new this.web3.eth.Contract(
-        dhbwCoinArtifact.abi as any,
-        deployedNetwork.address,
-      );
+  private async setupChainConnection() {
+    const networkId = await this.web3.eth.net.getId();
+    const deployedNetwork = dhbwCoinArtifact.networks[networkId];
+    this.fairChargerContract = new this.web3.eth.Contract(
+      dhbwCoinArtifact.abi as any,
+      deployedNetwork.address,
+    );
 
-      // get accounts
-      const accounts = await this.web3.eth.getAccounts();
+    await this.web3.eth.getAccounts((error,accounts) => {
       this.account = accounts[0];
+    });
+   
+  }
 
-      this.refreshBalance();
-    } catch (error) {
-      console.error("Could not connect to contract or chain.");
+  public async start() {
+    if (window.ethereum) {
+      this.web3 = new Web3(window.ethereum);
+      try {
+        // Request account access if needed
+        await window.ethereum.enable();
+        await this.setupChainConnection();
+        await this.refreshBalance();
+        // Acccounts now exposed
+      } catch (error) {
+        // User denied account access...
+      }
+    }
+    // Legacy dapp browsers...
+    else if (window.web3) {
+      this.web3 = new Web3(window.web3.currentProvider);
+      this.setupChainConnection();
+    }
+    // Non-dapp browsers...
+    else {
+      console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
     }
     this.updateUI();
   }
 
   public async refreshBalance() {
-    const { balanceOf, decimals } = this.fairChargerContract.methods;
-    const balance = await balanceOf(this.account).call();
+    const { balanceOf, decimals, name } = this.fairChargerContract.methods;
+    const nameT = await name().call();
+    const balance = await balanceOf(this.account).call({from: this.account});
     const decimal = await decimals().call();
     const balanceF = parseFloat(balance) / Math.pow(10, decimal);
 
@@ -127,7 +142,7 @@ export class AppComponent {
     this.statusText = "Initiating transaction... (please wait)";
 
     const { transfer } = this.fairChargerContract.methods;
-    await transfer(this.chargerAccount, amount * 100).send({ from: this.account });
+    transfer(this.chargerAccount, amount * 100).send({ from: this.account });
   }
 
   public setStatus(message: any) {
@@ -165,7 +180,6 @@ export class AppComponent {
     this.initialSOC = 0;
     this.totalCost = 0;
     this.updateUI();
-    this.endCharging();
     this.showChargingInfo = false;
     this.statusText = "Bereit";
     this.statusColor = "green";
@@ -213,7 +227,7 @@ export class AppComponent {
         this.charging = false;
         this.showChargingInfo = false;
         this.refreshBalance();
-      }); 
+      });
 
     }
 

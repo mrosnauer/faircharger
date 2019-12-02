@@ -36,6 +36,8 @@ contract FairCharger {
         selfdestruct(sender);
     }
 
+    
+
     // The sender can extend the expiration at any time.
     function extend(uint256 newExpiration) public {
         require(msg.sender == sender);

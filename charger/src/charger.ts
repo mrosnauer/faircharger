@@ -1,5 +1,6 @@
 import { Request, Response, Express } from 'express';
 import Web3 from 'web3';
+import * as dhbwCoinArtifact from '../../../build/contracts/FairCharger.json';
 
 export interface Charger {
     price: number;
@@ -13,20 +14,34 @@ interface InternalCharger extends Charger {
 export class ChargerManager {
     private chargers: InternalCharger[];
     private idCounter: number;
+    private web3: Web3;
+    private fairChargerContract: any;
     constructor(private app: Express) {
         this.chargers = [];
         this.idCounter = 1;
+        this.web3 = new Web3(new Web3.providers.HttpProvider('localhost:7545'));
+
+    }
+
+    private async setupChain() {
+        const networkId = await this.web3.eth.net.getId();
+        const deployedNetwork = dhbwCoinArtifact.networks[networkId];
+        this.fairChargerContract = new this.web3.eth.Contract(
+            dhbwCoinArtifact.abi as any,
+            deployedNetwork.address,
+        );
     }
 
     /**
      * registerRoutes
      */
-    public registerRoutes() {
+    public registerRoutes(): void {
         this.app.get('/charger', this.routGetAllCharger);
         this.app.post('/charger', this.routCreateCharger);
         this.app.get('/charger/:id', this.routGetCharger);
         this.app.put('/charger/:id', this.routUpdateCharger);
         this.app.delete('/charger/:id', this.routDeleteCharger);
+        this.app.post('/charger/:id/pay', this.pay);
     }
 
     public getAllCharger() {
@@ -129,4 +144,9 @@ export class ChargerManager {
         }
         return id;
     }
+
+    private pay = (req: Request, res: Response) => {
+
+    }
+
 }

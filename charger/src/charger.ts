@@ -32,14 +32,14 @@ export class ChargerManager {
     }
 
     /**
-     * connect to the chain
+     * connect to the chain.
      */
     private async setupChain() {
         try {
             const networkId = await this.web3.eth.net.getId();
 
 
-            // this hack is needed to satisfy typescript
+            // this hack is needed to satisfy typescript.
             const networks: any = dhbwCoinArtifact.networks;
             const deployedNetwork = networks[networkId];
 
@@ -75,6 +75,7 @@ export class ChargerManager {
         return this.chargers.find(x => x.id === id);
     }
 
+
     public createCharger(chargerData: Charger) {
         const charger: InternalCharger = Object.assign({ id: this.idCounter++, lastValidPayment: { amount: 0, message: '' } }, chargerData);
         this.chargers.push(charger);
@@ -91,6 +92,7 @@ export class ChargerManager {
         return true;
     }
 
+    //Delete an existing charger. 
     public deleteCharger(id: number) {
         const count = this.chargers.length;
         this.chargers = this.chargers.filter(x => x.id !== id);
@@ -98,7 +100,7 @@ export class ChargerManager {
     }
 
     /**
-     * convert an internal to an external charger
+     * convert an internal to an external charger.
      * @param charger external object
      */
     private reduce(charger: InternalCharger): Charger {
@@ -165,6 +167,7 @@ export class ChargerManager {
         }
     }
 
+    // Checks for valid charger ID. 
     private validateChargerId = (req: Request, res: Response) => {
         const idParam = req.params.id;
         const id = Number(idParam);
@@ -178,7 +181,7 @@ export class ChargerManager {
     }
 
     /**
-     * wraps the pay method to close the connection if something goes wrong and handle errors
+     * wraps the pay method to close the connection if something goes wrong and handle errors.
      */
     private payWrap = async (req: Request, res: Response) => {
         try {

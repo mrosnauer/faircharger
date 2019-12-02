@@ -2,13 +2,13 @@
     "name": "charger",
     "version": "1.0.0",
     "description": "Server for Blockchain",
-    "main": "dist/index.js",
+    "main": "src/index.ts",
     "scripts": {
         "start": "npm run serve",
         "build": "npm run build-ts && npm run lint",
         "build-ts": "tsc",
         "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix",
-        "serve": "node dist/index.js",
+        "serve": "node dist/charger/src/index.js",
         "watch": "nodemon"
     },
     "author": "",

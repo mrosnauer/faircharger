@@ -6,6 +6,7 @@ import Web3 from "web3";
 import * as dhbwCoinArtifact from '../../../build/contracts/FairCharger.json';
 import { ChargeStickService } from './charge-stick.service.js';
 import { Observable, interval } from 'rxjs';
+import { PaymentChannelService } from './payment-channel.service';
 
 declare global {
   interface Window { web3: Web3; ethereum: any }
@@ -81,11 +82,14 @@ export class AppComponent {
     this.remainingBalanceOut = this.remainingBalance.toFixed(2);
   }
 
-  constructor(@Inject(WEB3) private web3: Web3, private service: ChargeStickService) {
+
+
+  constructor(@Inject(WEB3) private web3: Web3, private service: ChargeStickService, private paymentService: PaymentChannelService) {
   }
 
   ngOnInit() {
     this.start();
+    this.paymentService.init(this.web3);
   }
 
   private async setupChainConnection() {
@@ -205,7 +209,11 @@ export class AppComponent {
           this.remainingBalance = this.currentBalance - this.totalCost;
           this.updateUI();
         }
-        //TODO: Pay
+        
+        this.paymentService.signPayment(10,() => {
+          console.log("TEST");
+        });
+        
       });
 
   }

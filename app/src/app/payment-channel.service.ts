@@ -46,6 +46,7 @@ export class PaymentChannelService {
       ["address", "uint256"],
       [this.contractAddress, amount],
     );*/
+    return ethereumjs.soliditySHA3(["address","uint"], [new BN(this.contractAddress.replace('x',''),16), amount]).toString('hex');
     return ethereumjs.soliditySHA3(
       [ "address", "address", "uint", "uint" ],
       [ new BN("03d3ef18442361D220Cb14313D7B6e142dA276Ab", 16), 0, 1000, 1448075779 ]
@@ -58,9 +59,7 @@ export class PaymentChannelService {
   // amount, in wei, specifies how much ether should be sent.
   signPayment(amount, callback) {
     var message = this.constructPaymentMessage(amount);
-    console.log(message);
     this.web3.eth.getAccounts((error, accounts) => {
-      console.log(accounts);
       this.web3.eth.personal.sign("0x" + message.toString("hex"),accounts[0] ,
       callback);
     });

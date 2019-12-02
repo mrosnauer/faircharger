@@ -17,11 +17,10 @@ export class PaymentChannelService {
 
   constructor() { }
 
-  private contractAddress;
+  contractAddress;
   private web3;
 
-  init(web3: Web3, driverAccount, chargeStickAccount,maxVal) {
-    console.log("TESTER");
+  async init(web3: Web3, driverAccount, chargeStickAccount, maxVal, callback) {
     this.web3 = web3;
     let contracts: any = fairCharger;
     let abi = contracts.default.abi;
@@ -29,24 +28,17 @@ export class PaymentChannelService {
     //contract.transactionConfirmationBlocks = 1;
     let code = contracts.default.bytecode;
 
-    const deploy = async () => {
-      const gas = await contract.deploy({ data: code, arguments: [chargeStickAccount, 100] }).estimateGas();
-      console.log(gas);
-      const response = await contract.deploy({ data: code, arguments: [chargeStickAccount, 100] }).send({
-        from: driverAccount,
-        gas: gas + 1,
-        value: maxVal
-      });
 
-      console.log('Contract deployed to:', response.options.address);
+    const gas = await contract.deploy({ data: code, arguments: [chargeStickAccount, 100] }).estimateGas();
+    const obj = await contract.deploy({ data: code, arguments: [chargeStickAccount, 100] });
+    const obj2 = await obj.send({
+      from: driverAccount,
+      gas: gas + 1,
+      value: maxVal
+    }, callback);
+    console.log("TE213123ST");
+    return obj2;
 
-      return response;
-    };
-
-    deploy().then((contractClone) => {
-      console.log('CLONED-CONTRACT: ', contractClone);
-
-    }).catch(console.log);
 
     /*contract.deploy({
       data: code

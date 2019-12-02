@@ -7,13 +7,13 @@ import * as dhbwCoinArtifact from '../../../build/contracts/FairCharger.json';
 import { ChargeStickService } from './charge-stick.service.js';
 import { Observable, interval } from 'rxjs';
 import { PaymentChannelService } from './payment-channel.service';
-
+import { TouchSequence } from 'selenium-webdriver';
+import { Contract } from 'web3-eth-contract';
 var BN = require('bn.js')
 
 declare global {
   interface Window { web3: Web3; ethereum: any }
 }
-
 
 window.web3 = window.web3 || undefined;
 
@@ -38,6 +38,7 @@ export class AppComponent {
   Car Information: Injected
   */
   simulation;
+  simulate = false;
   charging = false;
   private carBatteryCap = 123;
 
@@ -46,8 +47,6 @@ export class AppComponent {
 
   private carSOCAbsolute = 0;
   carSOCAbsoluteOut = "";
-
-
 
   private initialSOC = 0;
 
@@ -78,7 +77,7 @@ export class AppComponent {
   private updateUI() {
     this.carSOCPercent = this.carSOCAbsolute / this.carBatteryCap * 100;
     this.carSOCPercentOut = this.carSOCPercent.toFixed(2);
-    this.totalCostOut = this.totalCost.toFixed(2);
+    this.totalCostOut = this.totalCost.toFixed(5);
     this.carSOCAbsoluteOut = this.carSOCAbsolute.toFixed(2);
     this.totalChargeOut = this.totalCharge.toFixed(2);
     this.remainingBalanceOut = this.remainingBalance.toFixed(2);
@@ -91,6 +90,26 @@ export class AppComponent {
 
   ngOnInit() {
     this.start();
+    this.simulation = interval(50).subscribe((val) => {
+      if (this.simulate) {
+        if (this.carSOCAbsolute >= this.carBatteryCap) {
+          this.endCharging();
+        } else {
+          const charged = 0.001;
+          this.paymentService.signPayment(charged * this.price * 1000000000000000000, () => {
+
+          });
+          this.carSOCAbsolute += charged;
+          this.totalCharge = this.carSOCAbsolute - this.initialSOC;
+          this.totalCost = (this.carSOCAbsolute - this.initialSOC) * this.price;
+          this.remainingBalance = this.currentBalance - this.totalCost;
+          this.updateUI();
+        }
+
+
+        this.simulation.unsubscribe();
+      }
+    });
   }
 
   private async setupChainConnection() {
@@ -101,10 +120,10 @@ export class AppComponent {
       deployedNetwork.address,
     );
 
-    await this.web3.eth.getAccounts((error,accounts) => {
+    await this.web3.eth.getAccounts((error, accounts) => {
       this.account = accounts[0];
     });
-   
+
   }
 
   public async start() {
@@ -115,7 +134,7 @@ export class AppComponent {
         await window.ethereum.enable();
         await this.setupChainConnection();
         //await this.refreshBalance();
-        
+
         // Acccounts now exposed
       } catch (error) {
         // User denied account access...
@@ -136,7 +155,7 @@ export class AppComponent {
   public async refreshBalance() {
     const { balanceOf, decimals, name } = this.fairChargerContract.methods;
     const nameT = await name().call();
-    const balance = await balanceOf(this.account).call({from: this.account});
+    const balance = await balanceOf(this.account).call({ from: this.account });
     const decimal = await decimals().call();
     const balanceF = parseFloat(balance) / Math.pow(10, decimal);
 
@@ -175,7 +194,6 @@ export class AppComponent {
     } else {
       alert("Bitte die Ladesäule angeben");
     }
-
   }
 
   declinePrice() {
@@ -191,43 +209,70 @@ export class AppComponent {
     this.statusColor = "green";
   }
 
-  startCharging() {
-    this.carSOCPercent = 0;
-    this.initialSOC = this.carSOCAbsolute;
-    this.totalCost = 0;
-    this.showChargingInfo = true;
-    this.updateUI();
-    this.charging = true;
-    this.statusText = "Lade...";
-    this.statusColor = "green";
-    this.paymentService.init(this.web3, this.account, this.chargerAccount, new BN("1000000000000000000"));
-    this.simulation = interval(50)
-      .subscribe((val) => {
-        if (this.carSOCAbsolute >= this.carBatteryCap) {
-          this.endCharging();
-        } else {
-          this.carSOCAbsolute += 0.001;
-          this.totalCharge = this.carSOCAbsolute - this.initialSOC;
-          this.totalCost = (this.carSOCAbsolute - this.initialSOC) * this.price;
-          this.remainingBalance = this.currentBalance - this.totalCost;
-          this.updateUI();
-        }
-        
-        this.paymentService.signPayment(1000,() => {
-          console.log("TEST");
-        });
-        this.simulation.unsubscribe();
-        
-      });
+  callback(err) {
+    if (err == null) {
+      //Da das untere callback nicht aufgerufen wird, wird die Adresse hier manuell gesetzt
+      this.charging = true;
+      this.simulate = true;
+      this.showChargingInfo = true;
+      this.statusText = "Lade";
+      this.statusColor = "green";
+      this.initialSOC = this.carSOCAbsolute;
+      this.totalCost = 0;
 
+    } else {
+      this.statusText = "Bei dem Deployment des Contracts ist ein Fehler aufgetreten:" + err;
+      this.statusColor = "red";
+    }
   }
 
+  startCharging() {
+    //Öffne Payment Channel
+    this.statusText = "Öffne Payment Channel...";
+    this.statusColor = "black";
+
+    const maxCost = (this.carBatteryCap - this.carSOCAbsolute) * this.price;
+    //Schätze Ladekosten
+
+    /*const callback = (err, transactionHash) => {
+      if (err == null) {
+        //Da das untere callback nicht aufgerufen wird, wird die Adresse hier manuell gesetzt
+        this.charging = true;
+        this.simulate = true;
+        this.showChargingInfo = true;
+        this.statusText = "Lade";
+        this.statusColor = "green";
+        this.initialSOC = this.carSOCAbsolute;
+        this.totalCost = 0;
+
+      } else {
+        this.statusText = "Bei dem Deployment des Contracts ist ein Fehler aufgetreten:" + err;
+        this.statusColor = "red";
+      }
+    }*/
+
+    //Callback wird nicht aufgerufen...
+    this.paymentService.init(this.web3, this.account, this.chargerAccount, maxCost * 1000000000000000000, null).then((value:Contract) => {
+      //DAS HIER WIRD NICHT AUFGERUFEN
+      //Siehe https://github.com/ethereum/web3.js/issues/2104
+      this.callback(null);
+    }, (reason:any) => {
+      this.callback(null);
+      //DAS HIER AUCH NICHT...
+      //Siehe https://github.com/ethereum/web3.js/issues/2104
+    });
+
+    //DESWEGEN MUSS DIE ADRESSE MANUELLE EINGEGEBEN WERDEN
+    this.paymentService.contractAddress = window.prompt("Bitte die Adresse des Contracts aus Ganache kopieren und hier einfügen","0xAB...");
+    this.callback(null);
+
+  }
 
   endCharging() {
     if (this.simulation) {
       this.statusText = "Ladevorgang abgeschlossen! Vervollständige Zahlung";
       this.statusColor = "black";
-      this.simulation.unsubscribe();
+      this.simulate = false;
       this.totalCost = Math.round(this.totalCost * 100) / 100;
       this.send(this.totalCost.toFixed(2)).then(() => {
         this.statusText = "Zahlung erfolgreich";

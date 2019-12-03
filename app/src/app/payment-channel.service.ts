@@ -29,6 +29,7 @@ export class PaymentChannelService {
    * @param callback callback function
    */
   async init(web3: Web3, driverAccount, chargeStickAccount, maxVal, callback) {
+    console.log("DEPLOY");
     this.web3 = web3;
     let contracts: any = fairCharger;
     let abi = contracts.default.abi;
@@ -44,7 +45,7 @@ export class PaymentChannelService {
       from: driverAccount,
       gas: gas + 1,
       value: maxVal
-    }, () => callback());
+    }, callback;
     //On our machine, web3 was not passing the await ans infinitely stuck. See Github link
     return obj2;
   }

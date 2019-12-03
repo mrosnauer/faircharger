@@ -4,40 +4,41 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
 <div class="text-center">
-<h1>FairCharger</h1>
-<!--Infos zum Account und Auto-->
-<div>
-    <div>Aktueller Kontostand: {{currentBalanceOut}} Ether</div>
-    <div>Aktueller Ladezustand: {{carSOCPercentOut}} % / {{carSOCAbsoluteOut}} kWh</div>
-</div>
-<br>
+    <h1>FairCharger</h1>
+    <!--Infos zum Account und Auto-->
+    <div>
+        <div>Aktueller Kontostand: {{currentBalanceOut}} Ether</div>
+        <div>Aktueller Ladezustand: {{carSOCPercentOut}} % / {{carSOCAbsoluteOut}} kWh</div>
+    </div>
+    <br>
 
-<!--Verbinden zu einer Ladesäule-->
-<div>
-    <input type="text" #titleInput placeholder="Ladesäulen ID">
-    <button [disabled]="charging || showPriceInfo" type="submit" (click)='sendChargeRequest(titleInput.value)'>Preis
-        abrufen</button>
-</div>
-<br>
+    <!--Verbinden zu einer Ladesäule-->
+    <div>
+        <input type="text" #titleInput placeholder="Ladesäulen ID">
+        <button class="btn btn-success" [disabled]="charging || showPriceInfo" type="submit" (click)='sendChargeRequest(titleInput.value)'>Preis
+            abrufen</button>
+    </div>
+    <br>
 
-<!--Ladesäulen-Info: ID und Preis-->
-<div *ngIf="showPriceInfo">
-    <div>Ladesäulen-ID: {{chargerAccount}}</div>
-    <div>Preis: {{price}} Ether pro kWh</div>
-    <button [disabled]="charging" type="submit" (click)='startCharging()'>Ladevorgang starten</button>
-    <button [disabled]="charging" type="submit" (click)='declinePrice()'>Ladesäule trennen</button>
-</div>
-<br>
-<!--Ladeinfo: Geladener Strom und Preis-->
-<div *ngIf="showChargingInfo">
-    <div style="color:green">Geladener Strom {{totalChargeOut}} kWh</div>
-    <div style="color:red">Kosten {{totalCostOut}} Ether</div>
-    <div>Übriger Kontostand {{totalCostOut}} Ether</div>
-    <button *ngIf="charging" type="submit" (click)='endCharging()'>Abschließen und bezahlen...</button>
-</div>
-<br>
+    <!--Ladesäulen-Info: ID und Preis-->
+    <div *ngIf="showPriceInfo">
+        <div>Ladesäulen-ID: {{chargerAccount}}</div>
+        <div>Preis: {{price}} Ether pro kWh</div>
+        <button class="btn btn-success" [disabled]="charging" type="submit" (click)='startCharging()'>Ladevorgang starten</button>
+        <button class="btn btn-danger" [disabled]="charging" type="submit" (click)='declinePrice()'>Ladesäule trennen</button>
+    </div>
+    <br>
+    <!--Ladeinfo: Geladener Strom und Preis-->
+    <div *ngIf="showChargingInfo">
+        <div style="color:green">Geladener Strom {{totalChargeOut}} kWh</div>
+        <div style="color:red">Kosten {{totalCostOut}} Ether</div>
+        <div>Übriger Kontostand {{totalCostOut}} Ether</div>
+        <button class="btn btn-secondary" *ngIf="charging" type="submit" (click)='endCharging()'>Abschließen und bezahlen...</button>
+    </div>
+    <br>
 
-<!--Ladevorgang abschließen-->
-<div [ngStyle]="{'color': statusColor}">{{statusText}}</div>
-<br>
+    <!--Ladevorgang abschließen-->
+    <div class="font-weight-bold" [ngStyle]="{'color': statusColor}">{{statusText}}</div>
+    <br>
 </div>
+

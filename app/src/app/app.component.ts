@@ -188,21 +188,6 @@ export class AppComponent {
   }
 
   /**
-   * Refreshes the balance
-   */
-  public async refreshBalance() {
-    const { balanceOf, decimals, name } = this.fairChargerContract.methods;
-    const nameT = await name().call();
-    const balance = await balanceOf(this.account).call({ from: this.account });
-    const decimal = await decimals().call();
-    const balanceF = parseFloat(balance) / Math.pow(10, decimal);
-
-    this.currentBalanceOut = balanceF.toFixed(decimal);
-    this.currentBalance = decimal;
-  }
-
-
-  /**
    * Sends a request to a charger with a specific ID
    * @param chargerID the ID of the charger
    */

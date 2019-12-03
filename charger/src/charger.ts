@@ -15,7 +15,6 @@ interface InternalCharger extends Charger {
     id: number;
     //last valid payment for each sender accountID
     lastValidPayment: { amount: number; message: string };
-
 }
 
 export class ChargerManager {
@@ -27,7 +26,9 @@ export class ChargerManager {
     constructor(private app: Express) {
         this.chargers = [];
         this.idCounter = 1;
-        this.web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:7545'));
+        this.web3 = new Web3(
+            new Web3.providers.HttpProvider('http://localhost:7545')
+        );
         this.setupChain();
     }
 
@@ -38,20 +39,20 @@ export class ChargerManager {
         try {
             const networkId = await this.web3.eth.net.getId();
 
-
             // this hack is needed to satisfy typescript.
             const networks: any = dhbwCoinArtifact.networks;
             const deployedNetwork = networks[networkId];
 
-
             this.fairChargerContract = new this.web3.eth.Contract(
                 dhbwCoinArtifact.abi as any,
-                deployedNetwork.address,
+                deployedNetwork.address
             );
             console.log('chain connection doen');
         } catch (error) {
             console.error(error);
-            console.log('something went wrong while setting up the chain connection');
+            console.log(
+                'something went wrong while setting up the chain connection'
+            );
         }
     }
 
@@ -75,9 +76,14 @@ export class ChargerManager {
         return this.chargers.find(x => x.id === id);
     }
 
-
     public createCharger(chargerData: Charger) {
-        const charger: InternalCharger = Object.assign({ id: this.idCounter++, lastValidPayment: { amount: 0, message: '' } }, chargerData);
+        const charger: InternalCharger = Object.assign(
+            {
+                id: this.idCounter++,
+                lastValidPayment: { amount: 0, message: '' }
+            },
+            chargerData
+        );
         this.chargers.push(charger);
         return charger;
     }
@@ -92,7 +98,7 @@ export class ChargerManager {
         return true;
     }
 
-    //Delete an existing charger. 
+    //Delete an existing charger.
     public deleteCharger(id: number) {
         const count = this.chargers.length;
         this.chargers = this.chargers.filter(x => x.id !== id);
@@ -109,22 +115,26 @@ export class ChargerManager {
 
     private routGetAllCharger = (req: Request, res: Response) => {
         res.send(this.getAllCharger().map(this.reduce));
-    }
+    };
 
     private routGetCharger = (req: Request, res: Response) => {
         const id = this.validateChargerId(req, res);
-        if (id === 0) { return; }
+        if (id === 0) {
+            return;
+        }
         const charger = this.getCharger(id);
         if (charger === undefined) {
             res.status(404).send(`No charger found with id ${id}`);
             return;
         }
         res.send(this.reduce(charger));
-    }
+    };
 
     private routUpdateCharger = (req: Request, res: Response) => {
         const id = this.validateChargerId(req, res);
-        if (id === 0) { return; }
+        if (id === 0) {
+            return;
+        }
 
         const newChargerData = req.body;
         if (this.updateCharger(newChargerData, id) === false) {
@@ -132,13 +142,15 @@ export class ChargerManager {
             return;
         }
         res.send();
-    }
+    };
 
     private routCreateCharger = (req: Request, res: Response) => {
         const priceParam = req.body.price;
         const price = Number(priceParam);
         if (isNaN(price)) {
-            res.status(400).send(`The given price is not a number! price value: ${priceParam}`);
+            res.status(400).send(
+                `The given price is not a number! price value: ${priceParam}`
+            );
             return;
         }
 
@@ -148,16 +160,18 @@ export class ChargerManager {
         };
 
         const result = this.createCharger(charger);
-        if (typeof (result) === 'string') {
+        if (typeof result === 'string') {
             res.status(400).send(result);
         } else {
             res.send(this.reduce(result));
         }
-    }
+    };
 
     private routDeleteCharger = (req: Request, res: Response) => {
         const id = this.validateChargerId(req, res);
-        if (id === 0) { return; }
+        if (id === 0) {
+            return;
+        }
 
         // used guide: https://restfulapi.net/http-methods/#delete
         if (this.deleteCharger(id)) {
@@ -165,20 +179,24 @@ export class ChargerManager {
         } else {
             res.status(204).send();
         }
-    }
+    };
 
-    // Checks for valid charger ID. 
+    // Checks for valid charger ID.
     private validateChargerId = (req: Request, res: Response) => {
         const idParam = req.params.id;
         const id = Number(idParam);
         if (isNaN(id)) {
-            res.status(400).send(`The ID after /charger/ was not a number! value: ${idParam}`);
+            res.status(400).send(
+                `The ID after /charger/ was not a number! value: ${idParam}`
+            );
             return 0;
         } else if (id <= 0) {
-            res.status(400).send(`The ID after /charger/ is not allowed to be smaller than 1! value ${id}`);
+            res.status(400).send(
+                `The ID after /charger/ is not allowed to be smaller than 1! value ${id}`
+            );
         }
         return id;
-    }
+    };
 
     /**
      * wraps the pay method to close the connection if something goes wrong and handle errors.
@@ -186,7 +204,9 @@ export class ChargerManager {
     private payWrap = async (req: Request, res: Response) => {
         try {
             const id = this.validateChargerId(req, res);
-            if (id === 0) { return; }
+            if (id === 0) {
+                return;
+            }
 
             const charger = this.getCharger(id);
             if (charger === undefined) {
@@ -194,9 +214,12 @@ export class ChargerManager {
                 return;
             }
 
-            if (await this.pay(req, res, charger) === undefined) {
+            if ((await this.pay(req, res, charger)) === undefined) {
                 const { close } = this.fairChargerContract.methods;
-                await close(charger.lastValidPayment.amount, charger.lastValidPayment.message);
+                await close(
+                    charger.lastValidPayment.amount,
+                    charger.lastValidPayment.message
+                );
             } else {
                 res.status(200).send();
             }
@@ -204,25 +227,31 @@ export class ChargerManager {
             console.error(error);
             console.log('some error in payWrap happend');
         }
-    }
+    };
 
-    private pay = async (req: Request, res: Response, charger: InternalCharger): Promise<boolean | undefined> => {
+    private pay = async (
+        req: Request,
+        res: Response,
+        charger: InternalCharger
+    ): Promise<boolean | undefined> => {
         const { message: messageParam, count: countParam } = req.body;
         if (messageParam === undefined) {
-            res.status(404).send('No message in request body!');
+            res.status(400).send('No message in request body!');
             return;
         }
         if (countParam === undefined) {
-            res.status(404).send('No count in request body!');
+            res.status(400).send('No count in request body!');
             return;
         }
         const count = Number(countParam);
         if (isNaN(count)) {
-            res.status(404).send(`Count is not a number! value: ${countParam}`);
+            res.status(400).send(`Count is not a number! value: ${countParam}`);
             return;
         }
         if (count < 0) {
-            res.status(404).send(`Count cannot be smaller than 0! value: ${count}`);
+            res.status(400).send(
+                `Count cannot be smaller than 0! value: ${count}`
+            );
             return;
         }
 
@@ -237,6 +266,5 @@ export class ChargerManager {
             return true;
         }
         res.status(400).send('the message is not valid');
-    }
-
+    };
 }

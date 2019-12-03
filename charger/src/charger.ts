@@ -174,7 +174,7 @@ export class ChargerManager {
         if (isNaN(id)) {
             res.status(400).send(`The ID after /charger/ was not a number! value: ${idParam}`);
             return 0;
-        } else if (id <= 1) {
+        } else if (id <= 0) {
             res.status(400).send(`The ID after /charger/ is not allowed to be smaller than 1! value ${id}`);
         }
         return id;

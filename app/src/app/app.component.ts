@@ -120,6 +120,7 @@ export class AppComponent {
 
           //Pay and send to charge stick (off-chain)
           this.paymentService.signPayment(charged * this.price * 1000000000000000000, (error, result) => {
+            console.log(result);
             this.service.sendPostRequest("/charger/" + this.chargerID + "/pay", {
                 message: result,
                 count: this.count
@@ -217,7 +218,6 @@ export class AppComponent {
           this.statusColor = "green";
         },
         (error) => {
-          console.log('oops', error)
           this.statusText = "Bei der Verbindung zur Ladesäule ist ein Fehler aufgetreten";
           this.statusColor = "red";
         }
@@ -287,8 +287,7 @@ export class AppComponent {
     this.paymentService.init(this.web3, this.account, this.chargerAccount, maxCost * 1000000000000000000, callback).then((value:Contract) => {
       //DAS HIER WIRD NICHT AUFGERUFEN
       //Siehe https://github.com/ethereum/web3.js/issues/2104
-      //this.callback(null);
-      console.log("TEST132");
+      this.callback(null);
     }, (err:any) => {
       this.callback(err);
       //this.callback(null);

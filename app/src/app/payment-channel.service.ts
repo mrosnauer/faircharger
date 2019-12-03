@@ -29,7 +29,6 @@ export class PaymentChannelService {
    * @param callback callback function
    */
   async init(web3: Web3, driverAccount, chargeStickAccount, maxVal, callback) {
-    console.log("DEPLOY");
     this.web3 = web3;
     let contracts: any = fairCharger;
     let abi = contracts.default.abi;
@@ -37,7 +36,6 @@ export class PaymentChannelService {
     let code = contracts.default.bytecode;
 
     //Estimate Gas cost
-    console.log(driverAccount);
     const gas = await contract.deploy({ data: code, arguments: [chargeStickAccount, 100] }).estimateGas();
     //Deploy contract
     const obj = await contract.deploy({ data: code, arguments: [chargeStickAccount, 100] });

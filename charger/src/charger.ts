@@ -234,7 +234,8 @@ export class ChargerManager {
         res: Response,
         charger: InternalCharger
     ): Promise<boolean | undefined> => {
-        const { message: messageParam, count: countParam } = req.body;
+        const messageParam = req.body.message;
+        const countParam = req.body.count;
         if (messageParam === undefined) {
             res.status(400).send('No message in request body!');
             return;

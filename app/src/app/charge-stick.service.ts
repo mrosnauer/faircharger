@@ -10,11 +10,11 @@ export class ChargeStickService {
 
   private REST_API_SERVER = "http://localhost:8080";
 
-  public sendGetRequest(endpoint:string){
+  public sendGetRequest(endpoint: string) {
     return this.httpClient.get(this.REST_API_SERVER + endpoint);
   }
 
-  public sendPostRequest(endpoint:string, data){
-    return this.httpClient.post(this.REST_API_SERVER + endpoint,JSON.stringify(data));
+  public sendPostRequest(endpoint: string, data) {
+    return this.httpClient.post(this.REST_API_SERVER + endpoint, JSON.stringify(data), { headers: { "Content-Type": "application/json" } });
   }
 }

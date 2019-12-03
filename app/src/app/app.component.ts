@@ -104,7 +104,7 @@ export class AppComponent {
    */
   ngOnInit() {
     this.start();
-    this.simulation = interval(10000).subscribe((val) => {
+    this.simulation = interval(10).subscribe((val) => {
       if (this.simulate) {
         if (this.carSOCAbsolute >= this.carBatteryCap) {
           this.endCharging();
@@ -119,7 +119,7 @@ export class AppComponent {
           this.updateUI();
 
           //Pay and send to charge stick (off-chain)
-          this.paymentService.signPayment(charged * this.price * 1000000000000000000, (error, result) => {
+          /*this.paymentService.signPayment(charged * this.price * 1000000000000000000, (error, result) => {
             console.log(result);
             this.service.sendPostRequest("/charger/" + this.chargerID + "/pay", {
                 message: result,
@@ -133,7 +133,7 @@ export class AppComponent {
                 this.statusColor = "red";
               }
             );
-          });
+          });*/
 
           this.count++;
         }

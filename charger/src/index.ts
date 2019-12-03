@@ -22,7 +22,7 @@ chargerManager.registerRoutes();
 
 console.log(chargerManager.createCharger({
     accountID: '0x4Cc806EEaFD16e73b43DD201B6CB7122d1685cD5',
-    price: 0.01
+    price: 0.0001
 }));
 
 

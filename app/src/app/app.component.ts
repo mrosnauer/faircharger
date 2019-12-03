@@ -3,7 +3,7 @@ import { FormControl } from "@angular/forms";
 import { WEB3 } from './share/web3';
 import Web3 from "web3";
 
-import * as dhbwCoinArtifact from '../../../build/contracts/FairCharger.json';
+import * as fairChargerArtifact from '../../../build/contracts/FairCharger.json';
 import { ChargeStickService } from './charge-stick.service.js';
 import { Observable, interval } from 'rxjs';
 import { PaymentChannelService } from './payment-channel.service';
@@ -89,6 +89,19 @@ export class AppComponent {
   }
 
 
+  /**
+   * Reclaim the remaining ether on the contract
+   */
+  private reclaim() {
+    const { claimTimeout } = fairChargerArtifact.;
+    const balance = await balanceOf(this.account).call();
+    const decimal = await decimals().call();
+
+    const balanceElement = document.getElementsByClassName("balance")[0];
+    balanceElement.innerHTML = `${balance / (Math.pow(10, decimal))}.${(balance % 100).toString().padStart(2, '0')}`;
+
+  }
+
 
   /**
    * Dependency injection
@@ -104,13 +117,13 @@ export class AppComponent {
    */
   ngOnInit() {
     this.start();
-    this.simulation = interval(10).subscribe((val) => {
+    this.simulation = interval(10000).subscribe((val) => {
       if (this.simulate) {
         if (this.carSOCAbsolute >= this.carBatteryCap) {
           this.endCharging();
         } else {
-          const charged = 0.001;
-          
+          const charged = 10;
+
           //Simulate charging
           this.carSOCAbsolute += charged;
           this.totalCharge = this.carSOCAbsolute - this.initialSOC;
@@ -119,11 +132,10 @@ export class AppComponent {
           this.updateUI();
 
           //Pay and send to charge stick (off-chain)
-          /*this.paymentService.signPayment(charged * this.price * 1000000000000000000, (error, result) => {
-            console.log(result);
+          this.paymentService.signPayment(charged * this.price * 1000000000000000000, (error, result) => {
             this.service.sendPostRequest("/charger/" + this.chargerID + "/pay", {
-                message: result,
-                count: this.count
+              message: result,
+              count: this.count
 
             }).subscribe(
               (data: any) => {
@@ -133,7 +145,7 @@ export class AppComponent {
                 this.statusColor = "red";
               }
             );
-          });*/
+          });
 
           this.count++;
         }
@@ -146,9 +158,9 @@ export class AppComponent {
    */
   private async setupChainConnection() {
     const networkId = await this.web3.eth.net.getId();
-    const deployedNetwork = dhbwCoinArtifact.networks[networkId];
+    const deployedNetwork = fairChargerArtifact.networks[networkId];
     this.fairChargerContract = new this.web3.eth.Contract(
-      dhbwCoinArtifact.abi as any,
+      fairChargerArtifact.abi as any,
       deployedNetwork.address,
     );
 
@@ -235,8 +247,8 @@ export class AppComponent {
    */
   callback(err) {
     if (err == null) {
-      this.paymentService.contractAddress = window.prompt("Bitte die Adresse des Contracts aus Ganache kopieren und hier einfügen","0xAB...");
-  
+      this.paymentService.contractAddress = window.prompt("Bitte die Adresse des Contracts aus Ganache kopieren und hier einfügen", "0xAB...");
+
       //Reset all values
       this.charging = true;
       this.simulate = true;
@@ -261,7 +273,7 @@ export class AppComponent {
     this.statusColor = "black";
     //Schätze Ladekosten
     const maxCost = (this.carBatteryCap - this.carSOCAbsolute) * this.price;
-    
+
     //Behelfs-Callback, wegen Problem unten
     const callback = (err, transactionHash) => {
       this.callback(err);
@@ -269,11 +281,11 @@ export class AppComponent {
 
     //Öffne Payment Channel
     //Callback wird nicht aufgerufen...
-    this.paymentService.init(this.web3, this.account, this.chargerAccount, maxCost * 1000000000000000000, callback).then((value:Contract) => {
+    this.paymentService.init(this.web3, this.account, this.chargerAccount, maxCost * 1000000000000000000, callback).then((value: Contract) => {
       //DAS HIER WIRD NICHT AUFGERUFEN
       //Siehe https://github.com/ethereum/web3.js/issues/2104
       this.callback(null);
-    }, (err:any) => {
+    }, (err: any) => {
       this.callback(err);
       //this.callback(null);
       //DAS HIER AUCH NICHT...
@@ -289,7 +301,10 @@ export class AppComponent {
     if (this.simulate) {
       this.statusText = "Ladevorgang abgeschlossen!";
       this.statusColor = "black";
-      this.simulate = false;    
+      this.simulate = false;
+      this.charging = false;
+
+      this.showChargingInfo = false;
     }
   }
 }

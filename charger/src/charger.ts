@@ -226,6 +226,7 @@ export class ChargerManager {
         } catch (error) {
             console.error(error);
             console.log('some error in payWrap happend');
+            res.status(500).send('someting went wrong while paying');
         }
     };
 

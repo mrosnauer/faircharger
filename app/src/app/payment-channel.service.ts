@@ -37,6 +37,7 @@ export class PaymentChannelService {
     let code = contracts.default.bytecode;
 
     //Estimate Gas cost
+    console.log(driverAccount);
     const gas = await contract.deploy({ data: code, arguments: [chargeStickAccount, 100] }).estimateGas();
     //Deploy contract
     const obj = await contract.deploy({ data: code, arguments: [chargeStickAccount, 100] });
@@ -45,7 +46,7 @@ export class PaymentChannelService {
       from: driverAccount,
       gas: gas + 1,
       value: maxVal
-    }, callback;
+    }, () => callback());
     //On our machine, web3 was not passing the await ans infinitely stuck. See Github link
     return obj2;
   }

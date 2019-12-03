@@ -249,8 +249,9 @@ export class AppComponent {
    * @param err error, if existing
    */
   callback(err) {
-    this.paymentService.contractAddress = window.prompt("Bitte die Adresse des Contracts aus Ganache kopieren und hier einfügen","0xAB...");
     if (err == null) {
+      this.paymentService.contractAddress = window.prompt("Bitte die Adresse des Contracts aus Ganache kopieren und hier einfügen","0xAB...");
+  
       //Reset all values
       this.charging = true;
       this.simulate = true;
@@ -286,9 +287,11 @@ export class AppComponent {
     this.paymentService.init(this.web3, this.account, this.chargerAccount, maxCost * 1000000000000000000, callback).then((value:Contract) => {
       //DAS HIER WIRD NICHT AUFGERUFEN
       //Siehe https://github.com/ethereum/web3.js/issues/2104
-      this.callback(null);
-    }, (reason:any) => {
-      this.callback(null);
+      //this.callback(null);
+      console.log("TEST132");
+    }, (err:any) => {
+      this.callback(err);
+      //this.callback(null);
       //DAS HIER AUCH NICHT...
       //Siehe https://github.com/ethereum/web3.js/issues/2104
     });

@@ -3,12 +3,20 @@
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
+<style>
+    .progress { margin-left: auto; margin-right:auto; }
+</style>
+
 <div class="text-center">
-    <h1>FairCharger</h1>
+    <h1 class="font-weight-bold">FairCharger</h1>
     <!--Infos zum Account und Auto-->
     <div>
-        <div>Aktueller Kontostand: {{currentBalanceOut}} Ether</div>
+        <br>
         <div>Aktueller Ladezustand: {{carSOCPercentOut}} % / {{carSOCAbsoluteOut}} kWh</div>
+        <br>
+        <div class="progress" style="width: 50%">
+            <div class="progress-bar" role="progressbar" style="width: 10%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">{{carSOCPercentOut}}</div>
+        </div>
     </div>
     <br>
 
@@ -24,6 +32,7 @@
     <div *ngIf="showPriceInfo">
         <div>Ladesäulen-ID: {{chargerAccount}}</div>
         <div>Preis: {{price}} Ether pro kWh</div>
+        <br>
         <button class="btn btn-success" [disabled]="charging" type="submit" (click)='startCharging()'>Ladevorgang starten</button>
         <button class="btn btn-danger" [disabled]="charging" type="submit" (click)='declinePrice()'>Ladesäule trennen</button>
     </div>

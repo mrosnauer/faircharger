@@ -111,7 +111,7 @@ export class AppComponent {
    */
   ngOnInit() {
     this.start();
-    this.simulation = interval(10000).subscribe((val) => {
+    this.simulation = interval(5000).subscribe((val) => {
       if (this.simulate) {
         if (this.carSOCAbsolute >= this.carBatteryCap) {
           this.endCharging();
@@ -120,6 +120,15 @@ export class AppComponent {
           
           //Simulate charging
           this.carSOCAbsolute += charged;
+
+          if (this.carSOCAbsolute > this.carBatteryCap) {
+            this.carSOCAbsolute = this.carBatteryCap;
+            this.totalCharge = this.carSOCAbsolute - this.initialSOC;
+            this.totalCost = (this.carSOCAbsolute - this.initialSOC) * this.price;
+            this.remainingBalance = this.currentBalance - this.totalCost;
+            this.updateUI();
+          }
+
           this.totalCharge = this.carSOCAbsolute - this.initialSOC;
           this.totalCost = (this.carSOCAbsolute - this.initialSOC) * this.price;
           this.remainingBalance = this.currentBalance - this.totalCost;

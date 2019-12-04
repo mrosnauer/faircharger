@@ -260,6 +260,7 @@ export class ChargerManager {
         // this calculation should be done by reading the creation datetime of the opening transaction
         // with this it is not needed to extract the datetime, but its not safe
         const amount = count * charger.price;
+        console.log(JSON.stringify(this.fairChargerContract.methods));
         const { isValidSignature } = this.fairChargerContract.methods;
 
         // only return true if the message is valid

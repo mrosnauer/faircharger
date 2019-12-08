@@ -17,7 +17,7 @@ Durch die Idee des Fairchargers wird das Infrastrukturproblem für Elektroautos 
 Wenn eine Person mit seinem Elektrofahrzeug an eine Ladesäule kommt kann er den Code, der auf jeder Ladesäule zur Identifikation stehen muss, in eine App eingeben/scannen. Über diesen Code wird der Preis für die Kilowattstunde und der hinterlegte Account der Ladesäule/Besitzer der Ladesäule abgefragt. Nach der Abfrage wird der Preis und der Account auf dem Handy des Fahrzeugbesitzers angezeigt. Dieser kann daraufhin bestätigen, falls dieser an dieser Ladesäule laden will oder nicht. Wenn dieser akzeptiert, wird über ein Payment Channels die Transaktionen abgewickelt. Der Ablauf wird in Abbildung 1 skizziert dargestellt.
 
 
-[./DokuBilder/Ablauf Faircharger.png](some image)
+![Image](./DokuBilder/AblaufFaircharger.png)
 
 Abbildung 1: Ablauf des Fairchargers
 
@@ -26,7 +26,7 @@ Abbildung 1: Ablauf des Fairchargers
 Der technische Ablauf des Fairchargers ist in Abbildung 2 zu erkennen. Sobald der Fahrer des Elektrofahrzeuges den Code der Ladesäule in seine App eingegeben hat, wird ein /GET-Request eine Anfrage an den Server der Ladesäule gestellt. Diese liefert über die Response den Preis und die Accountdaten der eingegebenen Ladesäule zurück. Dieser Preis und Account-ID wird daraufhin in der App des Fahrers angezeigt. Nachdem dieser den Preis akzeptiert wird ein Payment Channel mit den maximal möglichen Kosten bzw. den maximalen Kosten, die der Fahrer ausgeben möchte, aufgebaut. Der Payment Channel soll hierbei das Problem der Vor- bzw. Danach-Zahlung lösen. Beim Payment Channel werden signierte Zahlungen vom Sender zum Empfänger gesendet, die vorerst nicht auf der Blockchain zusammengefügt werden. Die Zahlungen werden dabei zyklisch alle 100ms gesendet. Die genaue Beschreibung zu Payment Channels steht in dem Kapitel „Payment Channels“. Nachdem der Ladevorgang abgeschlossen wurde, wird der Payment Channel geschlossen und alle bis dahin überwiesene Zahlungen werden final auf der Blockchain zusammengeführt. 
 
 
-[./DokuBilder/technischer Ablauf.png](some image)
+![Image](./DokuBilder/technischerAblauf.png)
 
 Abbildung 2: Technischer Ablauf
 
@@ -40,9 +40,15 @@ Für den Faircharger werden hierbei unidirektionale Payment Channels verwendet, 
 Bei unidirektionalen Payment Channels legt der Sender einen Smart Contract aus und öffnet hierdurch den Payment Channel zwischen ihm und einem Empfänger. Der maximal zusendende Betrag wird hierbei in dem Smart Contract festgeschrieben. Danach sendet der Sender mehrere „signed Payments“, mit einem festgelegten Betrag an den Empfänger. Diese Payments überschreiten hierbei nicht den maximalen Betrag. Das senden der signed Payments werden hierbei nicht über die Chain an den Empfänger gesendet, sondern laufen über ein eigenes Netzwerk. Dadurch müssen die Transaktionen vorerst nicht auf der Blockchain zusammengeführt werden. Nachdem der Empfänger alle nötigen Transaktionen erhalten hat, schließt dieser den Payment Channel. Daraufhin werden alle bis dahin gesendeten signed Payments auf der Blockchain als eine Transaktion zusammengeführt. Hierdurch wird die Privatsphäre geschützt, da keine Historie aus den Transaktionen herausgefunden werden kann, da nur die finale Bilanz zusammengeführt wird. Des Weiteren wird durch das nur einmalige Zusammenführen eine Schnelligkeit der Transaktionen geboten. In Abbildung XY sieht man hierzu die passende Darstellung des Aufbaus, Verlaufs und Abschluss eines Payment Channels. 
 
 
- [./DokuBilder/payment.png](some image)
+ ![Image](./DokuBilder/payment.png)
  
 Abbildung 3: Payment Channels
+
+## Architektur
+In Abbildung 4 wird die Architektur des Fairchargers dargestellt. Hierbei werden die Interaktionen zwischen der App des Fahrers, dem Smart Contract (Solidity) und dem Charger (Ladesäule) beschrieben. Wie bereits beschrieben wird, wenn der Fahrer an die Ladesäule fährt und den Code in seine App eingibt/scannt eine Anfrage gestellt, die die Charger ID (Account ID) und den Preis zurückliefert. Wenn der Fahrer diesen bestätigt, wird ein Smart Contract deployed, wodurch ein (Simple) Payment Channel eröffnet wird. Im Folgenden wird über diesen Payment Channel, solang geladen wird Geld an den Ladesäulen Account (Benutzer Account) überwiesen, in Form von signed Payments. Dies läuft nicht über die Blockchain. Wenn der Fahrer fertig mit Laden ist, wird der Channel geschlossen und der Ladesäulenbesitzer kann die Payments auf die Blockchain deployen. Danach sind diese als eine Transaktion auf der Blockchain zusammengeführt, wodurch Transaction Fees gespart werden.
+
+ ![Image](./DokuBilder/uml.png)
+
 
 ## Warum dieser Aufbau? 
 Dieser Aufbau wurde gewählt, da er viele Vorteile aufweist. Im Folgenden sind die Vorteile aufgelistet: 

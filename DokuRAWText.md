@@ -65,13 +65,14 @@ Dieser Aufbau wurde gewählt, da er viele Vorteile aufweist. Im Folgenden sind d
 
 ## Hindernisse bei der Implementierung
 Bei der Implementierung dieses Projekts sind wir auf Schwierigkeiten bzw. Hindernisse gestoßen. Ein großes Hindernis war hierbei die Payment Channels zu implementieren bzw. zu testen. Diese waren zu Beginn schwierig zu verstehen und komplex zu implementieren. Zudem variierte die Dokumentation im Internet zu den Payment Channels.
-Des Weiteren gab es Schwierigkeiten mit MetaMask und den Payment Channels. Dieses Hindernis beruhte darauf, dass unsere signed Payments über MetaMask gesigned werden. Dazu müsste man jedes gesendete Payment „Unterschreiben“ (ein Fenster von MetaMask hat sich mit einer Bestätigung geöffnet). 
+Des Weiteren gab es Schwierigkeiten mit MetaMask und den Payment Channels. Dieses Hindernis beruhte darauf, dass unsere signed Payments über MetaMask signiert werden. Dazu müsste man jedes gesendete Payment von Hand unterschreiben (ein Fenster von MetaMask hat sich mit einer Bestätigung geöffnet). (Code dazu: payment-channel.service.ts, Zeile 57)
+
 
 
 ## Probleme der Architektur 
-Das Problem mit dieser Architektur besteht in den Payment Channels. Diese können in unserer Architektur nur vom Empfänger geschlossen werden. Dass bedeutet, dass der Empfänger jeden Abend schauen muss, dass dieser das Geld für den heutigen Tag abzuholen. Zudem bedeutet das, dass der Sender immer einen ausreichend großen Timeout setzten muss, sodass die Transaktionen nicht wieder zurückgerufen werden. 
-Des Weiteren besteht ein Problem bei der Bezahlung durch die Payment Channel. Wie oben bereits beschrieben muss bei diesen jede Transaktion bestätigt werden. Dies führt durch die hohe Anzahl an Transaktionen (alle 100 ms) zu nicht nutzerfreundlichen Aufgabe. Deshalb müsste für dieses Problem in der realen Umsetzung des Fairchargers eine Lösung gefunden werden.  
-Zu guter Letzt sind wir auf ein Problem gestoßen, welches auch unter diesem Link zu finden ist: https://github.com/ethereum/web3.js/issues/2104. Bei diesem Problem wird das Promise nicht resolved und .then nie aufgerufen. In dem Link ist zu finden, dass sehr viele Personen versionsübergreifend Probleme mit Promises/Callbacks haben. 
+Das Problem mit dieser Architektur besteht in den Payment Channels. Diese können in unserer Architektur nur vom Empfänger geschlossen werden. Dass bedeutet, dass der Empfänger jeden Abend schauen muss, dass dieser das Geld für den heutigen Tag abzuholen. Zudem bedeutet das, dass der Sender immer einen ausreichend großen Timeout setzten muss, sodass die Transaktionen nicht wieder zurückgerufen werden. Dieses Problem wurde dadurch gelöst, dass der Sender das Timeout verlängern kann (Methode im Smart Contract).
+Des Weiteren besteht ein Problem bei der Bezahlung durch die Payment Channel. Wie oben bereits beschrieben muss bei diesen jede Transaktion bestätigt werden. Dies führt durch die hohe Anzahl an Transaktionen (alle 100 ms) zu einer nicht nutzerfreundlichen Aufgabe. Deshalb müsste für dieses Problem in der realen Umsetzung des Fairchargers eine Lösung gefunden werden.  
+Zu guter Letzt sind wir auf ein Problem gestoßen, welches auch unter diesem Link zu finden ist: https://github.com/ethereum/web3.js/issues/2104. Bei diesem Problem wird das Promise nicht resolved und .then nie aufgerufen. In dem Link ist zu finden, dass sehr viele Personen versionsübergreifend Probleme mit Promises/Callbacks in Web3 mit Metamask haben (Bei uns in app.component.ts, Zeile 289). Wir haben dieses Problem so gelöst, dass man aus Ganache manuell die Adresse des gerade hochgeladenen Contracts kopieren und einfügen muss. 
 
 
 ## Ist eine Blockchain notwendig?

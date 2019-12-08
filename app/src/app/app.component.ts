@@ -283,6 +283,7 @@ export class AppComponent {
       this.callback(err);
     }
 
+    
     //Öffne Payment Channel
     //Callback wird nicht aufgerufen...
     this.paymentService.init(this.web3, this.account, this.chargerAccount, maxCost * 1000000000000000000, callback).then((value:Contract) => {

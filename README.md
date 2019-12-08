@@ -10,6 +10,9 @@ Folder that contains a Node.js express server representing the charge stick
 ## Contracts
 The chain contracts.
 
+## Documentation
+The documentation can be found in the word file (Faircharger Dokumentation) as docx or in the md file (DokuRAWText). The präsentation is available at: 
+https://docs.google.com/presentation/d/1s190_PMatfdsTigAdeWC92Oup96Eg28kZNc9uR0plmM/edit?usp=sharing
 
 ## Charge process
 1. Open app

@@ -1,5 +1,10 @@
 # Faircharger
-Faircharger ist ein Blockchain-Projekt.
+Faircharger is a Blockchain-Project. The detailed instruction of how to build this project can be found below. 
+
+## Contributers
+		8019500
+    4622546
+		5704145
 
 ## App
 Folder that contains a Angular App for the user frontend
@@ -11,14 +16,14 @@ Folder that contains a Node.js express server representing the charge stick
 The chain contracts.
 
 ## Documentation
-The documentation can be found in the word file (Faircharger Dokumentation) as docx or in the md file (DokuRAWText). The präsentation is available at: 
+The documentation can be found in the word file (Faircharger Dokumentation) as docx or in the md file (DokuRAWText). The presentation is available at: 
 https://docs.google.com/presentation/d/1s190_PMatfdsTigAdeWC92Oup96Eg28kZNc9uR0plmM/edit?usp=sharing
 
 ## Charge process
 1. Open app
-2. Enter charger code (Blockchain account?)
-3. Get price from charger (GET)
-4. User accept/decline
+2. Enter charger code (Blockchain account)
+3. Get price from charger (GET-Request)
+4. User accept/decline the price 
 5. Payment channel with price, parallel get requests on the charge stick to get SOC
 6. End of charge, show coins...
 
@@ -47,6 +52,9 @@ account -> balance
 7. execure 'npm start' root level
 8. navigare into 'charger' and execure 'npm i', 'npm run build' and 'npm start'
 9. navigare into 'app' and execure 'npm i', 'npm run build' and 'npm start'
+10. open in browser with MetaMask: http://localhost:4200/
+11. connect MetaMask
+12. Follow instruction on website
 
 The services are availiable at:
 - angular       localhost:4200

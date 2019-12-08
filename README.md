@@ -2,9 +2,9 @@
 Faircharger is a Blockchain-Project. The detailed instruction of how to build this project can be found below. 
 
 ## Contributers
-		8019500
-    4622546
-		5704145
+- 8019500
+- 4622546
+- 5704145
 
 ## App
 Folder that contains a Angular App for the user frontend

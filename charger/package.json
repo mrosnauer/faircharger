@@ -20,7 +20,7 @@
         "express": "^4.17.1",
         "fs": "0.0.1-security",
         "web3": "^1.2.2",
-        "ws": "^7.2.0"
+        "ws": "^7.4.6"
     },
     "devDependencies": {
         "@types/cors": "^2.8.6",
